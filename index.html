@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shadowing Practice - Genius Unit 1</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+    margin-bottom: 6px;
+    text-align: center;
+    background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+    color: #aaa;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.07);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 720px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #7eb8da;
+    margin-bottom: 12px;
+  }
+
+  .toggle-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .toggle-btn {
+    padding: 8px 16px;
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    background: transparent;
+    color: #ccc;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .toggle-btn:hover { border-color: #3a7bd5; color: #fff; }
+  .toggle-btn.active {
+    background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+    border-color: transparent;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  /* Text display */
+  .text-display {
+    background: rgba(0,0,0,0.25);
+    border-radius: 12px;
+    padding: 20px;
+    line-height: 2.0;
+    font-size: 1.1rem;
+    min-height: 60px;
+    transition: filter 0.3s;
+    position: relative;
+  }
+  .text-display.lang-en {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 1.15rem;
+  }
+  .text-display.hidden-text {
+    filter: blur(8px);
+    user-select: none;
+  }
+
+  .text-display .sentence {
+    display: inline;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: background 0.3s;
+  }
+  .text-display .sentence.current {
+    background: rgba(58, 123, 213, 0.4);
+  }
+
+  /* Voice selector */
+  .control-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .control-row label {
+    font-size: 0.85rem;
+    color: #aaa;
+    white-space: nowrap;
+  }
+  .control-row select {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(0,0,0,0.3);
+    color: #fff;
+    font-size: 0.85rem;
+    appearance: auto;
+  }
+  .control-row select option {
+    background: #24243e;
+    color: #fff;
+  }
+  .control-row input[type="range"] {
+    flex: 1;
+    accent-color: #3a7bd5;
+  }
+  .speed-btn {
+    padding: 6px 12px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 16px;
+    background: transparent;
+    color: #aaa;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .speed-btn:hover { border-color: #3a7bd5; color: #fff; }
+  .speed-btn.active {
+    background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+    border-color: transparent;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  /* Main action button */
+  .action-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .main-btn {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.2);
+    background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    position: relative;
+    box-shadow: 0 4px 30px rgba(58, 123, 213, 0.4);
+  }
+  .main-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 40px rgba(58, 123, 213, 0.6);
+  }
+  .main-btn.recording {
+    background: linear-gradient(135deg, #e53935, #ff6f00);
+    border-color: rgba(255,0,0,0.3);
+    box-shadow: 0 4px 30px rgba(229, 57, 53, 0.5);
+    animation: pulse 1.5s infinite;
+  }
+  .main-btn .icon { font-size: 2rem; }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 4px 30px rgba(229, 57, 53, 0.5); }
+    50% { box-shadow: 0 4px 50px rgba(229, 57, 53, 0.8); }
+  }
+
+  .status-text {
+    font-size: 0.85rem;
+    color: #aaa;
+    min-height: 20px;
+    text-align: center;
+  }
+
+  /* Waveform */
+  .waveform-container {
+    width: 100%;
+    height: 60px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .waveform-container canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Results */
+  .result-card { text-align: center; }
+
+  .score-circle {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    margin: 10px auto 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .score-circle svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    transform: rotate(-90deg);
+  }
+  .score-circle circle {
+    fill: none;
+    stroke-width: 6;
+  }
+  .score-circle .bg { stroke: rgba(255,255,255,0.1); }
+  .score-circle .fg {
+    stroke: #00d2ff;
+    stroke-linecap: round;
+    stroke-dasharray: 377;
+    stroke-dashoffset: 377;
+    transition: stroke-dashoffset 1.5s ease;
+  }
+  .score-number {
+    font-size: 2.6rem;
+    font-weight: 700;
+    z-index: 1;
+  }
+  .score-label {
+    font-size: 0.75rem;
+    color: #aaa;
+    z-index: 1;
+  }
+
+  .score-grade {
+    font-size: 1.1rem;
+    margin-bottom: 16px;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+    text-align: left;
+  }
+  .detail-item {
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .detail-item .label { font-size: 0.75rem; color: #aaa; }
+  .detail-item .value { font-size: 1.1rem; font-weight: 600; margin-top: 4px; }
+
+  .comparison { text-align: left; margin-top: 12px; }
+  .comparison h4 {
+    font-size: 0.85rem;
+    color: #7eb8da;
+    margin-bottom: 8px;
+  }
+  .comparison-text {
+    background: rgba(0,0,0,0.25);
+    border-radius: 10px;
+    padding: 14px;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 1rem;
+    line-height: 1.8;
+  }
+  .comparison-text .match { color: #4caf50; }
+  .comparison-text .miss { color: #ef5350; text-decoration: line-through; }
+  .comparison-text .extra { color: #ff9800; }
+
+  .retry-btn {
+    padding: 12px 32px;
+    border: none;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+  }
+  .retry-btn:hover { transform: scale(1.05); }
+
+  .hidden { display: none !important; }
+
+  .warning {
+    background: rgba(255, 152, 0, 0.15);
+    border: 1px solid rgba(255, 152, 0, 0.4);
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 0.85rem;
+    color: #ffb74d;
+    margin-bottom: 16px;
+    max-width: 720px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .tip-text {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 10px;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 500px) {
+    .card { padding: 16px; }
+    .main-btn { width: 100px; height: 100px; }
+    .main-btn .icon { font-size: 1.6rem; }
+    h1 { font-size: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Shadowing Practice</h1>
+<p class="subtitle">Genius English Communication II - Unit 1 Model</p>
+
+<div id="browserWarning" class="warning hidden">
+  このアプリはChrome / Edgeブラウザでの使用を推奨します。<br>
+  音声認識機能 (Web Speech API) が必要です。
+</div>
+
+<!-- Text Card -->
+<div class="card">
+  <div class="card-title">Text</div>
+  <div class="toggle-row">
+    <button class="toggle-btn active" id="btnEnglish" onclick="setLang('en')">English</button>
+    <button class="toggle-btn" id="btnJapanese" onclick="setLang('ja')">Japanese</button>
+    <button class="toggle-btn active" id="btnShowText" onclick="toggleTextVisibility()">Show / Hide</button>
+  </div>
+  <div class="text-display lang-en" id="textDisplay"></div>
+  <div class="control-row">
+    <label>Voice:</label>
+    <select id="voiceSelect">
+      <option value="samantha" selected>Samantha (US Female)</option>
+      <option value="daniel">Daniel (UK Male)</option>
+      <option value="karen">Karen (AU Female)</option>
+    </select>
+  </div>
+  <div class="control-row">
+    <label>Speed:</label>
+    <button class="speed-btn" onclick="setSpeed(0.5)">0.5x</button>
+    <button class="speed-btn" onclick="setSpeed(0.6)">0.6x</button>
+    <button class="speed-btn" onclick="setSpeed(0.7)">0.7x</button>
+    <button class="speed-btn active" onclick="setSpeed(0.8)">0.8x</button>
+    <button class="speed-btn" onclick="setSpeed(0.9)">0.9x</button>
+    <button class="speed-btn" onclick="setSpeed(1.0)">1.0x</button>
+    <button class="speed-btn" onclick="setSpeed(1.2)">1.2x</button>
+  </div>
+</div>
+
+<!-- Action Card -->
+<div class="card">
+  <div class="card-title">Shadowing</div>
+  <div class="action-area">
+    <button class="main-btn" id="mainBtn" onclick="handleMainBtn()">
+      <span class="icon">&#9654;</span>
+      <span>START</span>
+    </button>
+    <div class="status-text" id="statusText">Press to start</div>
+    <div class="waveform-container" id="waveformContainer">
+      <canvas id="waveformCanvas"></canvas>
+    </div>
+  </div>
+  <p class="tip-text">
+    Tip: イヤホン使用を推奨します（スピーカー音声がマイクに入るのを防げます）
+  </p>
+</div>
+
+<!-- Results Card -->
+<div class="card result-card hidden" id="resultCard">
+  <div class="card-title">Result</div>
+  <div class="score-circle" id="scoreCircle">
+    <svg viewBox="0 0 160 160">
+      <circle class="bg" cx="80" cy="80" r="70"/>
+      <circle class="fg" id="scoreFg" cx="80" cy="80" r="70"/>
+    </svg>
+    <span class="score-number" id="scoreNumber">0%</span>
+    <span class="score-label">accuracy</span>
+  </div>
+  <div class="score-grade" id="scoreGrade"></div>
+
+  <div class="detail-grid">
+    <div class="detail-item">
+      <div class="label">Matched Words</div>
+      <div class="value" id="matchedWords">-</div>
+    </div>
+    <div class="detail-item">
+      <div class="label">Total Words</div>
+      <div class="value" id="totalWords">-</div>
+    </div>
+    <div class="detail-item">
+      <div class="label">Missed Words</div>
+      <div class="value" id="missedWords">-</div>
+    </div>
+    <div class="detail-item">
+      <div class="label">Extra Words</div>
+      <div class="value" id="extraWords">-</div>
+    </div>
+  </div>
+
+  <div class="comparison">
+    <h4>Original Text (matched words highlighted)</h4>
+    <div class="comparison-text" id="comparisonOriginal"></div>
+  </div>
+  <div class="comparison" style="margin-top:10px;">
+    <h4>Your Speech</h4>
+    <div class="comparison-text" id="comparisonUser"></div>
+  </div>
+
+  <button class="retry-btn" onclick="resetApp()">Try Again</button>
+</div>
+
+<script>
+// ---- Data ----
+const sentences = [
+  {
+    en: "I love wild animals, so if I have an opportunity to explore only one country, I'd like to go to Brunei.",
+    ja: "私は野生動物が大好きなので、もし1つの国だけを探検する機会があるなら、ブルネイに行きたいです。"
+  },
+  {
+    en: "Brunei is a small country in South-East Asia.",
+    ja: "ブルネイは東南アジアの小さな国です。"
+  },
+  {
+    en: "Many small animals, tropical birds, reptiles, and amphibians exist in the rainforests.",
+    ja: "多くの小さな動物、熱帯の鳥、は虫類、両生動物が熱帯雨林に生息しています。"
+  },
+  {
+    en: "There are over 300 bird species found in the rainforests, and there are around 100 mammals.",
+    ja: "熱帯雨林には300種以上の鳥類が生息しており、約100種の哺乳類がいます。"
+  },
+  {
+    en: "It is no surprise, then, that we can see very unique animals such as the proboscis monkey there.",
+    ja: "したがって、そこでテングザルのようなとてもユニークな動物を見ることができるのは驚くことではありません。"
+  },
+  {
+    en: "Brunei will surely bring me endless excitement.",
+    ja: "ブルネイはきっと私に終わりのないワクワクをもたらしてくれるでしょう。"
+  }
+];
+
+const fullEnglish = sentences.map(s => s.en).join(' ');
+
+// ---- State ----
+let currentLang = 'en';
+let textVisible = true;
+let isPlaying = false;
+let recognition = null;
+let recognizedText = '';
+let finalTranscript = '';
+let currentSentenceIndex = -1;
+let audioContext, analyser, microphone, dataArray, micStream;
+let animationId;
+let currentAudio = null;
+let playbackSpeed = 0.8;
+
+// ---- Synonym / fuzzy match map for common recognition variants ----
+const synonyms = {
+  "i'd": ["id", "i would", "i'd"],
+  "south-east": ["southeast", "south east"],
+  "300": ["three hundred"],
+  "100": ["one hundred", "a hundred"],
+  "proboscis": ["proboscis", "probosis", "probosces", "praboscis"],
+};
+
+// ---- Init ----
+window.addEventListener('DOMContentLoaded', () => {
+  renderText();
+
+  // Speed buttons are handled by setSpeed()
+
+  // Check browser support
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    document.getElementById('browserWarning').classList.remove('hidden');
+  }
+});
+
+// ---- Speed Control ----
+function setSpeed(speed) {
+  playbackSpeed = speed;
+  document.querySelectorAll('.speed-btn').forEach(btn => {
+    btn.classList.toggle('active', parseFloat(btn.textContent) === speed);
+  });
+  // Update current audio if playing
+  if (currentAudio) {
+    currentAudio.playbackRate = speed;
+  }
+}
+
+// ---- Audio File TTS ----
+function getAudioPath(sentenceIndex) {
+  const voice = document.getElementById('voiceSelect').value;
+  return `audio/${voice}_${sentenceIndex + 1}.wav`;
+}
+
+// ---- Text Display ----
+function renderText() {
+  const container = document.getElementById('textDisplay');
+  container.innerHTML = '';
+  container.classList.toggle('lang-en', currentLang === 'en');
+  sentences.forEach((s, i) => {
+    const span = document.createElement('span');
+    span.className = 'sentence';
+    span.id = 'sentence-' + i;
+    span.textContent = currentLang === 'en' ? s.en : s.ja;
+    container.appendChild(span);
+    if (i < sentences.length - 1) container.appendChild(document.createTextNode(' '));
+  });
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('btnEnglish').classList.toggle('active', lang === 'en');
+  document.getElementById('btnJapanese').classList.toggle('active', lang === 'ja');
+  renderText();
+  highlightSentence(currentSentenceIndex);
+}
+
+function toggleTextVisibility() {
+  textVisible = !textVisible;
+  document.getElementById('btnShowText').classList.toggle('active', textVisible);
+  document.getElementById('textDisplay').classList.toggle('hidden-text', !textVisible);
+}
+
+function highlightSentence(index) {
+  sentences.forEach((_, i) => {
+    const el = document.getElementById('sentence-' + i);
+    if (el) el.classList.toggle('current', i === index);
+  });
+}
+
+// ---- Main Button ----
+function handleMainBtn() {
+  if (isPlaying) {
+    stopAll();
+  } else {
+    startShadowing();
+  }
+}
+
+// ---- Shadowing Flow ----
+async function startShadowing() {
+  isPlaying = true;
+  recognizedText = '';
+  finalTranscript = '';
+  currentSentenceIndex = -1;
+  document.getElementById('resultCard').classList.add('hidden');
+
+  const btn = document.getElementById('mainBtn');
+  btn.classList.add('recording');
+  btn.innerHTML = '<span class="icon">&#9724;</span><span>STOP</span>';
+  document.getElementById('statusText').textContent = 'Listening & Recording...';
+
+  // Start microphone + waveform first
+  await startWaveform();
+
+  // Start recognition
+  startRecognition();
+
+  // Small delay before TTS to let recognition settle
+  setTimeout(() => {
+    if (isPlaying) speakAllSentences();
+  }, 500);
+}
+
+function stopAll() {
+  const wasPlaying = isPlaying;
+  isPlaying = false;
+
+  // Stop audio playback
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.src = '';
+    currentAudio = null;
+  }
+
+  // Stop recognition - try stop() first to get final results, then abort as fallback
+  if (recognition) {
+    try {
+      recognition.onend = null;
+      recognition.stop();
+    } catch(e) {
+      try { recognition.abort(); } catch(e2) {}
+    }
+    recognition = null;
+  }
+
+  // Capture transcript after stopping recognition
+  const spokenText = (recognizedText || finalTranscript || '').trim();
+
+  stopWaveform();
+  highlightSentence(-1);
+
+  const btn = document.getElementById('mainBtn');
+  btn.classList.remove('recording');
+  btn.innerHTML = '<span class="icon">&#9654;</span><span>START</span>';
+
+  if (wasPlaying && spokenText) {
+    document.getElementById('statusText').textContent = 'Evaluating...';
+    setTimeout(() => {
+      showResults(spokenText);
+      document.getElementById('statusText').textContent = 'Done!';
+    }, 500);
+  } else if (wasPlaying) {
+    document.getElementById('statusText').textContent = 'No speech detected. Please check microphone permission.';
+  } else {
+    document.getElementById('statusText').textContent = 'Press to start';
+  }
+}
+
+function speakAllSentences() {
+  let index = 0;
+  const speed = playbackSpeed;
+
+  function speakNext() {
+    if (!isPlaying || index >= sentences.length) {
+      if (isPlaying) {
+        document.getElementById('statusText').textContent = 'Finishing up...';
+        setTimeout(() => {
+          if (isPlaying) stopAll();
+        }, 3000);
+      }
+      return;
+    }
+
+    currentSentenceIndex = index;
+    highlightSentence(index);
+
+    const path = getAudioPath(index);
+    const audio = new Audio(path);
+    audio.playbackRate = speed;
+    currentAudio = audio;
+
+    audio.onended = () => {
+      currentAudio = null;
+      index++;
+      setTimeout(speakNext, 500);
+    };
+
+    audio.onerror = () => {
+      console.log('TTS audio error, trying next sentence');
+      currentAudio = null;
+      index++;
+      setTimeout(speakNext, 500);
+    };
+
+    audio.play().catch(err => {
+      console.log('Audio play failed:', err);
+      index++;
+      setTimeout(speakNext, 500);
+    });
+  }
+
+  speakNext();
+}
+
+// ---- Speech Recognition ----
+function startRecognition() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    document.getElementById('statusText').textContent = 'Speech recognition not supported in this browser. Please use Chrome.';
+    return;
+  }
+
+  finalTranscript = '';
+  let lastResultIndex = 0;
+  let recognitionFailed = false;
+
+  function createRecognition() {
+    const rec = new SpeechRecognition();
+    rec.lang = 'en-US';
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+
+    rec.onresult = (event) => {
+      let interim = '';
+      // Only process new results from resultIndex to avoid duplication
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const result = event.results[i];
+        if (result.isFinal) {
+          finalTranscript += result[0].transcript + ' ';
+        } else {
+          interim += result[0].transcript;
+        }
+      }
+      recognizedText = (finalTranscript + interim).trim();
+
+      // Update status with live transcript preview
+      if (recognizedText) {
+        const preview = recognizedText.length > 60
+          ? '...' + recognizedText.slice(-57)
+          : recognizedText;
+        document.getElementById('statusText').textContent = 'Heard: ' + preview;
+      }
+    };
+
+    rec.onend = () => {
+      // Auto-restart if still in session and not failed
+      if (isPlaying && !recognitionFailed) {
+        try {
+          setTimeout(() => {
+            if (isPlaying) {
+              recognition = createRecognition();
+              recognition.start();
+            }
+          }, 200);
+        } catch(e) {}
+      }
+    };
+
+    rec.onerror = (event) => {
+      if (event.error === 'no-speech') return;
+      if (event.error === 'aborted') return;
+      if (event.error === 'not-allowed') {
+        recognitionFailed = true;
+        document.getElementById('statusText').textContent =
+          'Microphone permission denied. Please allow microphone access and reload.';
+        return;
+      }
+      console.log('Recognition error:', event.error);
+    };
+
+    return rec;
+  }
+
+  recognition = createRecognition();
+
+  try {
+    recognition.start();
+  } catch(e) {
+    console.log('Recognition start error:', e);
+  }
+}
+
+// ---- Waveform Visualization ----
+async function startWaveform() {
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioContext.createAnalyser();
+    microphone = audioContext.createMediaStreamSource(micStream);
+    microphone.connect(analyser);
+    analyser.fftSize = 256;
+    dataArray = new Uint8Array(analyser.frequencyBinCount);
+    drawWaveform();
+  } catch (e) {
+    console.log('Microphone access denied:', e);
+    document.getElementById('statusText').textContent = 'Microphone access required. Please allow and try again.';
+  }
+}
+
+function drawWaveform() {
+  if (!isPlaying) return;
+  animationId = requestAnimationFrame(drawWaveform);
+
+  const canvas = document.getElementById('waveformCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth * 2;
+  canvas.height = canvas.offsetHeight * 2;
+
+  analyser.getByteFrequencyData(dataArray);
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const barWidth = (canvas.width / dataArray.length) * 1.5;
+  let x = 0;
+
+  for (let i = 0; i < dataArray.length; i++) {
+    const barHeight = (dataArray[i] / 255) * canvas.height * 0.85;
+    const gradient = ctx.createLinearGradient(0, canvas.height, 0, canvas.height - barHeight);
+    gradient.addColorStop(0, 'rgba(0, 210, 255, 0.6)');
+    gradient.addColorStop(1, 'rgba(58, 123, 213, 0.9)');
+    ctx.fillStyle = gradient;
+    const y = (canvas.height - barHeight) / 2;
+    ctx.fillRect(x, y, barWidth - 1, barHeight);
+    x += barWidth;
+  }
+}
+
+function stopWaveform() {
+  cancelAnimationFrame(animationId);
+  if (micStream) {
+    micStream.getTracks().forEach(t => t.stop());
+    micStream = null;
+  }
+  if (audioContext) {
+    audioContext.close();
+    audioContext = null;
+  }
+  const canvas = document.getElementById('waveformCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// ---- Evaluation ----
+function normalizeText(text) {
+  return text
+    .toLowerCase()
+    .replace(/['']/g, "'")
+    .replace(/[-]/g, ' ')
+    .replace(/[^a-z0-9' ]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Expand synonyms so the original text includes common recognition variants
+function expandOriginal(words) {
+  const expanded = [];
+  for (const w of words) {
+    expanded.push(w);
+  }
+  return expanded;
+}
+
+function fuzzyMatch(origWord, spokenWord) {
+  if (origWord === spokenWord) return true;
+
+  // Check synonym map
+  for (const [key, variants] of Object.entries(synonyms)) {
+    const keyNorm = normalizeText(key);
+    if (origWord === keyNorm || variants.some(v => normalizeText(v) === origWord)) {
+      if (spokenWord === keyNorm || variants.some(v => normalizeText(v) === spokenWord)) {
+        return true;
+      }
+    }
+  }
+
+  // Levenshtein-based fuzzy: allow 1 edit for words >= 4 chars
+  if (origWord.length >= 4 && spokenWord.length >= 4) {
+    const dist = levenshtein(origWord, spokenWord);
+    if (dist <= 1) return true;
+    // Also allow 2 edits for long words (>= 7 chars)
+    if (origWord.length >= 7 && spokenWord.length >= 5 && dist <= 2) return true;
+  }
+
+  return false;
+}
+
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({ length: m + 1 }, (_, i) => [i]);
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i-1] === b[j-1]
+        ? dp[i-1][j-1]
+        : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+    }
+  }
+  return dp[m][n];
+}
+
+function computeScore(original, spoken) {
+  const origWords = normalizeText(original).split(' ').filter(w => w.length > 0);
+  const spokenWords = normalizeText(spoken).split(' ').filter(w => w.length > 0);
+
+  const m = origWords.length;
+  const n = spokenWords.length;
+
+  // LCS with fuzzy matching
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (fuzzyMatch(origWords[i-1], spokenWords[j-1])) {
+        dp[i][j] = dp[i-1][j-1] + 1;
+      } else {
+        dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+      }
+    }
+  }
+
+  const lcsLength = dp[m][n];
+
+  // Backtrack
+  const origMatched = new Set();
+  const spokenMatched = new Set();
+  let i = m, j = n;
+  while (i > 0 && j > 0) {
+    if (fuzzyMatch(origWords[i-1], spokenWords[j-1])) {
+      origMatched.add(i-1);
+      spokenMatched.add(j-1);
+      i--; j--;
+    } else if (dp[i-1][j] > dp[i][j-1]) {
+      i--;
+    } else {
+      j--;
+    }
+  }
+
+  // Raw ratio
+  const rawRatio = m > 0 ? lcsLength / m : 0;
+
+  // Motivational scoring curve:
+  // - Boosts lower scores so beginners don't feel discouraged
+  // - Moderate effort yields 60-75%
+  // - Good effort yields 75-90%
+  // - Near-perfect yields 90-97%
+  // - Only truly perfect gets 98-100%
+  let adjustedPct;
+  if (rawRatio >= 0.95) {
+    // Excellent: 95-100% raw -> 95-100% display
+    adjustedPct = 95 + (rawRatio - 0.95) * 100;
+  } else if (rawRatio >= 0.7) {
+    // Good range: 70-95% raw -> 75-95% display
+    adjustedPct = 75 + (rawRatio - 0.7) * (20 / 0.25);
+  } else if (rawRatio >= 0.4) {
+    // Moderate: 40-70% raw -> 55-75% display
+    adjustedPct = 55 + (rawRatio - 0.4) * (20 / 0.3);
+  } else if (rawRatio >= 0.15) {
+    // Beginner: 15-40% raw -> 35-55% display
+    adjustedPct = 35 + (rawRatio - 0.15) * (20 / 0.25);
+  } else {
+    // Minimal: 0-15% raw -> 10-35% display
+    adjustedPct = 10 + (rawRatio / 0.15) * 25;
+  }
+
+  const percentage = Math.min(100, Math.round(adjustedPct));
+
+  return {
+    percentage,
+    rawPercentage: Math.round(rawRatio * 100),
+    matched: lcsLength,
+    total: m,
+    missed: m - lcsLength,
+    extra: Math.max(0, n - lcsLength),
+    origWords,
+    spokenWords,
+    origMatched,
+    spokenMatched
+  };
+}
+
+function getGrade(pct) {
+  if (pct >= 95) return { text: 'Excellent! Perfect shadowing!', color: '#4caf50', emoji: '' };
+  if (pct >= 85) return { text: 'Great job! Almost perfect!', color: '#66bb6a', emoji: '' };
+  if (pct >= 75) return { text: 'Well done! Keep it up!', color: '#8bc34a', emoji: '' };
+  if (pct >= 60) return { text: 'Good effort! Getting better!', color: '#ff9800', emoji: '' };
+  if (pct >= 45) return { text: 'Nice try! Practice more!', color: '#ff7043', emoji: '' };
+  return { text: 'Keep going! Try slower speed!', color: '#ef5350', emoji: '' };
+}
+
+function showResults(spokenText) {
+  const textToEval = spokenText || recognizedText;
+  if (!textToEval.trim()) return;
+
+  const result = computeScore(fullEnglish, textToEval);
+  const grade = getGrade(result.percentage);
+
+  document.getElementById('resultCard').classList.remove('hidden');
+  document.getElementById('scoreNumber').textContent = result.percentage + '%';
+  document.getElementById('scoreGrade').innerHTML =
+    `<span style="color:${grade.color}">${grade.emoji} ${grade.text}</span>`;
+  document.getElementById('matchedWords').textContent = result.matched + ' / ' + result.total;
+  document.getElementById('totalWords').textContent = result.total;
+  document.getElementById('missedWords').textContent = result.missed;
+  document.getElementById('extraWords').textContent = result.extra;
+
+  // Animate score circle
+  const circumference = 2 * Math.PI * 70; // r=70
+  const fg = document.getElementById('scoreFg');
+  fg.style.strokeDasharray = circumference;
+  fg.style.strokeDashoffset = circumference;
+  const offset = circumference - (circumference * result.percentage / 100);
+  setTimeout(() => { fg.style.strokeDashoffset = offset; }, 100);
+  fg.style.stroke = grade.color;
+
+  // Show comparison
+  let origHtml = result.origWords.map((w, i) => {
+    return result.origMatched.has(i)
+      ? `<span class="match">${w}</span>`
+      : `<span class="miss">${w}</span>`;
+  }).join(' ');
+  document.getElementById('comparisonOriginal').innerHTML = origHtml;
+
+  let spokenHtml = result.spokenWords.map((w, i) => {
+    return result.spokenMatched.has(i)
+      ? `<span class="match">${w}</span>`
+      : `<span class="extra">${w}</span>`;
+  }).join(' ');
+  document.getElementById('comparisonUser').innerHTML =
+    spokenHtml || '<em style="color:#666">No speech detected</em>';
+
+  document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
+}
+
+function resetApp() {
+  recognizedText = '';
+  finalTranscript = '';
+  currentSentenceIndex = -1;
+  document.getElementById('resultCard').classList.add('hidden');
+  document.getElementById('statusText').textContent = 'Press to start';
+  const circumference = 2 * Math.PI * 70;
+  const fg = document.getElementById('scoreFg');
+  fg.style.strokeDasharray = circumference;
+  fg.style.strokeDashoffset = circumference;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
