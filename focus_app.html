@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Put It into Focus - Unit 1 Practice</title>
-<script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<!-- PDF is generated via print-to-PDF for full Japanese support -->
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -1059,243 +1059,250 @@ function resetApp() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ---- PDF Generation ----
+// ---- PDF Generation (HTML print method for full Japanese support) ----
 function downloadPDF(type) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF('p', 'mm', 'a4');
-  const pageW = 210;
-  const margin = 20;
-  const contentW = pageW - margin * 2;
-  let y = 25;
-
-  function addHeader(title) {
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(16);
-    doc.text(title, pageW / 2, y, { align: 'center' });
-    y += 8;
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(120);
-    doc.text('Genius English Communication II - Unit 1: Put It into Focus', pageW / 2, y, { align: 'center' });
-    doc.setTextColor(0);
-    y += 5;
-    doc.setDrawColor(200);
-    doc.line(margin, y, pageW - margin, y);
-    y += 10;
-  }
-
-  function addName() {
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Name: ____________________________    Date: ______________', margin, y);
-    y += 12;
-  }
-
-  function checkPage(needed) {
-    if (y + needed > 275) {
-      doc.addPage();
-      y = 20;
+  const commonCSS = `
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    @page { size: A4; margin: 20mm; }
+    body {
+      font-family: 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
+      color: #222;
+      font-size: 11pt;
+      line-height: 1.7;
     }
+    .page { page-break-after: always; }
+    .page:last-child { page-break-after: auto; }
+    .header {
+      text-align: center;
+      margin-bottom: 8px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #333;
+    }
+    .header h1 {
+      font-size: 18pt;
+      margin-bottom: 4px;
+      color: #1a1a2e;
+    }
+    .header .sub {
+      font-size: 9pt;
+      color: #666;
+    }
+    .name-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 14px 0 20px;
+      font-size: 10pt;
+    }
+    .name-row span {
+      border-bottom: 1px solid #333;
+      display: inline-block;
+    }
+    .name-row .name-blank { width: 200px; }
+    .name-row .date-blank { width: 120px; }
+    .instructions {
+      font-size: 10pt;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .instructions-sub {
+      font-size: 9pt;
+      color: #666;
+      font-style: italic;
+      margin-bottom: 16px;
+    }
+    .question {
+      margin-bottom: 18px;
+    }
+    .q-ja {
+      font-size: 10pt;
+      color: #444;
+      margin-bottom: 4px;
+    }
+    .q-en {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 12pt;
+      line-height: 1.8;
+      margin-left: 12px;
+    }
+    .q-en .blank {
+      display: inline-block;
+      min-width: 80px;
+      border-bottom: 2px solid #333;
+      text-align: center;
+      margin: 0 2px;
+      color: transparent;
+    }
+    .word-box {
+      background: #f5f5f5;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 8px 14px;
+      margin: 4px 0 6px 12px;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 11pt;
+      font-style: italic;
+      color: #333;
+    }
+    .answer-line {
+      border-bottom: 1px solid #999;
+      height: 28px;
+      margin: 4px 12px 0;
+    }
+    .writing-lines {
+      margin-left: 12px;
+    }
+    .writing-lines .line {
+      border-bottom: 1px solid #bbb;
+      height: 32px;
+    }
+    .answer-section {
+      margin-top: 24px;
+      padding-top: 12px;
+      border-top: 2px solid #999;
+    }
+    .answer-section h3 {
+      font-size: 11pt;
+      margin-bottom: 8px;
+      color: #333;
+    }
+    .answer-section .ans {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 10pt;
+      line-height: 1.8;
+      color: #555;
+    }
+  `;
+
+  function buildHeader(title) {
+    return `
+      <div class="header">
+        <h1>${title}</h1>
+        <div class="sub">Genius English Communication II - Unit 1: Put It into Focus</div>
+      </div>
+      <div class="name-row">
+        <div>Name: <span class="name-blank">&nbsp;</span></div>
+        <div>Date: <span class="date-blank">&nbsp;</span></div>
+      </div>
+    `;
   }
 
-  function drawFillInBlank() {
-    addHeader('Fill in the Blanks');
-    addName();
-
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Fill in the blanks to complete each sentence.', margin, y);
-    y += 4;
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'italic');
-    doc.setTextColor(100);
-    doc.text('Write the correct word(s) in each blank to match the Japanese meaning.', margin, y);
-    doc.setTextColor(0);
-    y += 10;
-
+  function buildFillInBlank() {
+    let html = buildHeader('Fill in the Blanks ― カッコ穴埋め問題');
+    html += `
+      <div class="instructions">Fill in the blanks to complete each sentence.</div>
+      <div class="instructions-sub">日本語の意味に合うように、空欄に適切な語を入れなさい。</div>
+    `;
     sentences.forEach((s, i) => {
-      checkPage(32);
-
-      // Japanese meaning
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(80);
-      doc.text(`${i + 1}. ${s.ja}`, margin, y);
-      doc.setTextColor(0);
-      y += 7;
-
-      // English with blanks
       let enText = s.en;
       s.blanks.forEach(blank => {
-        const underline = '(' + ' '.repeat(Math.max(10, blank.length * 2)) + ')';
-        enText = enText.replace(blank, underline);
+        enText = enText.replace(blank, `<span class="blank">${blank}</span>`);
       });
-
-      doc.setFontSize(11);
-      doc.setFont('times', 'normal');
-      const lines = doc.splitTextToSize(enText, contentW);
-      lines.forEach(line => {
-        doc.text(line, margin + 8, y);
-        y += 6;
-      });
-      y += 6;
+      html += `
+        <div class="question">
+          <div class="q-ja">${i + 1}. ${s.ja}</div>
+          <div class="q-en">${enText}</div>
+        </div>
+      `;
     });
-
-    // Answer key
-    checkPage(40);
-    y += 5;
-    doc.setDrawColor(200);
-    doc.line(margin, y, pageW - margin, y);
-    y += 8;
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Answer Key', margin, y);
-    y += 7;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    sentences.forEach((s, i) => {
-      checkPage(8);
-      doc.text(`${i + 1}. ${s.blanks.join(' / ')}`, margin + 4, y);
-      y += 5;
-    });
+    html += `
+      <div class="answer-section">
+        <h3>Answer Key ― 解答</h3>
+        ${sentences.map((s, i) => `<div class="ans">${i + 1}. ${s.blanks.join(' / ')}</div>`).join('')}
+      </div>
+    `;
+    return html;
   }
 
-  function drawReorder() {
-    addHeader('Word Rearrangement');
-    addName();
-
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Arrange the words to form the correct sentence.', margin, y);
-    y += 4;
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'italic');
-    doc.setTextColor(100);
-    doc.text('Rearrange the given words/phrases to match the Japanese meaning.', margin, y);
-    doc.setTextColor(0);
-    y += 10;
-
+  function buildReorder() {
+    let html = buildHeader('Word Rearrangement ― 並び替え問題');
+    html += `
+      <div class="instructions">Arrange the words to form the correct sentence.</div>
+      <div class="instructions-sub">日本語の意味に合うように、語句を正しく並べ替えなさい。</div>
+    `;
     sentences.forEach((s, i) => {
-      checkPage(40);
-
-      // Japanese
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(80);
-      doc.text(`${i + 1}. ${s.ja}`, margin, y);
-      doc.setTextColor(0);
-      y += 7;
-
-      // Scrambled words in a box
-      doc.setFontSize(10);
-      doc.setFont('times', 'italic');
-      const wordText = `[ ${s.reorder.given} ]`;
-      const wordLines = doc.splitTextToSize(wordText, contentW - 16);
-      doc.setDrawColor(180);
-      doc.setFillColor(245, 245, 245);
-      doc.roundedRect(margin + 4, y - 4, contentW - 8, wordLines.length * 6 + 6, 2, 2, 'FD');
-      doc.setTextColor(40);
-      wordLines.forEach(line => {
-        doc.text(line, margin + 10, y + 1);
-        y += 6;
-      });
-      doc.setTextColor(0);
-      y += 4;
-
-      // Answer line
-      doc.setDrawColor(180);
-      doc.line(margin + 8, y + 2, pageW - margin - 8, y + 2);
-      y += 12;
+      html += `
+        <div class="question">
+          <div class="q-ja">${i + 1}. ${s.ja}</div>
+          <div class="word-box">[ ${s.reorder.given} ]</div>
+          <div class="answer-line"></div>
+        </div>
+      `;
     });
-
-    // Answers
-    checkPage(40);
-    y += 5;
-    doc.setDrawColor(200);
-    doc.line(margin, y, pageW - margin, y);
-    y += 8;
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Answer Key', margin, y);
-    y += 7;
-    doc.setFont('times', 'normal');
-    doc.setFontSize(9);
-    sentences.forEach((s, i) => {
-      checkPage(8);
-      doc.text(`${i + 1}. ${s.reorder.answer}`, margin + 4, y);
-      y += 5;
-    });
+    html += `
+      <div class="answer-section">
+        <h3>Answer Key ― 解答</h3>
+        ${sentences.map((s, i) => `<div class="ans">${i + 1}. ${s.reorder.answer}</div>`).join('')}
+      </div>
+    `;
+    return html;
   }
 
-  function drawWrite() {
-    addHeader('Write the Full Sentence');
-    addName();
-
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Translate the Japanese into English.', margin, y);
-    y += 4;
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'italic');
-    doc.setTextColor(100);
-    doc.text('Write the complete English sentence for each Japanese sentence below.', margin, y);
-    doc.setTextColor(0);
-    y += 10;
-
+  function buildWrite() {
+    let html = buildHeader('Write the Full Sentence ― 英作文問題');
+    html += `
+      <div class="instructions">Translate the Japanese into English.</div>
+      <div class="instructions-sub">次の日本語を英語に直しなさい。</div>
+    `;
     sentences.forEach((s, i) => {
-      checkPage(36);
-
-      doc.setFontSize(11);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`${i + 1}. ${s.ja}`, margin, y);
-      y += 8;
-
-      // Writing lines
-      for (let l = 0; l < 2; l++) {
-        doc.setDrawColor(200);
-        doc.line(margin + 8, y + 2, pageW - margin - 8, y + 2);
-        y += 8;
-      }
-      y += 6;
+      html += `
+        <div class="question">
+          <div class="q-ja">${i + 1}. ${s.ja}</div>
+          <div class="writing-lines">
+            <div class="line"></div>
+            <div class="line"></div>
+          </div>
+        </div>
+      `;
     });
-
-    // Answers
-    checkPage(40);
-    y += 5;
-    doc.setDrawColor(200);
-    doc.line(margin, y, pageW - margin, y);
-    y += 8;
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Answer Key', margin, y);
-    y += 7;
-    doc.setFont('times', 'normal');
-    doc.setFontSize(9);
-    sentences.forEach((s, i) => {
-      checkPage(8);
-      doc.text(`${i + 1}. ${s.en}`, margin + 4, y);
-      y += 5;
-    });
+    html += `
+      <div class="answer-section">
+        <h3>Answer Key ― 解答</h3>
+        ${sentences.map((s, i) => `<div class="ans">${i + 1}. ${s.en}</div>`).join('')}
+      </div>
+    `;
+    return html;
   }
 
-  if (type === 'fill') {
-    drawFillInBlank();
-    doc.save('Unit1_Focus_Fill_in_Blanks.pdf');
-  } else if (type === 'reorder') {
-    drawReorder();
-    doc.save('Unit1_Focus_Word_Rearrangement.pdf');
-  } else if (type === 'write') {
-    drawWrite();
-    doc.save('Unit1_Focus_Write_Sentences.pdf');
-  } else if (type === 'all') {
-    drawFillInBlank();
-    doc.addPage();
-    y = 25;
-    drawReorder();
-    doc.addPage();
-    y = 25;
-    drawWrite();
-    doc.save('Unit1_Focus_All_Worksheets.pdf');
+  // Build content
+  let pages = [];
+  if (type === 'fill' || type === 'all') pages.push(buildFillInBlank());
+  if (type === 'reorder' || type === 'all') pages.push(buildReorder());
+  if (type === 'write' || type === 'all') pages.push(buildWrite());
+
+  const fullHTML = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Unit 1 - Practice Worksheet</title>
+  <style>${commonCSS}</style>
+</head>
+<body>
+  ${pages.map(p => `<div class="page">${p}</div>`).join('')}
+</body>
+</html>`;
+
+  // Create blob and open in new tab for printing
+  const blob = new Blob([fullHTML], { type: 'text/html; charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const printWin = window.open(url, '_blank');
+  if (printWin) {
+    printWin.onload = () => {
+      setTimeout(() => {
+        printWin.print();
+        URL.revokeObjectURL(url);
+      }, 500);
+    };
+  } else {
+    // Fallback: download as HTML file if popup blocked
+    const a = document.createElement('a');
+    a.href = url;
+    const names = { fill: 'Fill_in_Blanks', reorder: 'Word_Rearrangement', write: 'Write_Sentences', all: 'All_Worksheets' };
+    a.download = `Unit1_Focus_${names[type] || 'Worksheet'}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    document.getElementById('statusText').textContent = 'HTMLファイルをダウンロードしました。ブラウザで開いて印刷→PDF保存してください。';
   }
 }
 </script>
