@@ -1281,29 +1281,31 @@ function downloadPDF(type) {
 </body>
 </html>`;
 
-  // Create blob and open in new tab for printing
+  // Display in iframe overlay for printing (no popup needed)
+  let overlay = document.getElementById('pdfOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'pdfOverlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:flex;flex-direction:column;align-items:center;padding:10px;';
+    document.body.appendChild(overlay);
+  }
+  overlay.innerHTML = `
+    <div style="display:flex;gap:12px;margin-bottom:10px;flex-shrink:0;">
+      <button onclick="document.getElementById('pdfFrame').contentWindow.print()" style="padding:12px 28px;border:none;border-radius:24px;background:linear-gradient(135deg,#f7971e,#ffd200);color:#1a1a2e;font-size:1rem;font-weight:700;cursor:pointer;">PDF保存 / 印刷</button>
+      <button onclick="document.getElementById('pdfOverlay').style.display='none'" style="padding:12px 28px;border:1px solid rgba(255,255,255,0.3);border-radius:24px;background:transparent;color:#fff;font-size:1rem;cursor:pointer;">閉じる</button>
+    </div>
+    <p style="color:#aaa;font-size:0.8rem;margin-bottom:8px;flex-shrink:0;">「PDF保存 / 印刷」→ 送信先を「PDFに保存」に変更 → 保存</p>
+    <iframe id="pdfFrame" style="flex:1;width:100%;max-width:800px;border:none;border-radius:8px;background:#fff;"></iframe>
+  `;
+  overlay.style.display = 'flex';
+
+  const iframe = document.getElementById('pdfFrame');
   const blob = new Blob([fullHTML], { type: 'text/html; charset=utf-8' });
   const url = URL.createObjectURL(blob);
-  const printWin = window.open(url, '_blank');
-  if (printWin) {
-    printWin.onload = () => {
-      setTimeout(() => {
-        printWin.print();
-        URL.revokeObjectURL(url);
-      }, 500);
-    };
-  } else {
-    // Fallback: download as HTML file if popup blocked
-    const a = document.createElement('a');
-    a.href = url;
-    const names = { fill: 'Fill_in_Blanks', reorder: 'Word_Rearrangement', write: 'Write_Sentences', all: 'All_Worksheets' };
-    a.download = `Unit1_Focus_${names[type] || 'Worksheet'}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    document.getElementById('statusText').textContent = 'HTMLファイルをダウンロードしました。ブラウザで開いて印刷→PDF保存してください。';
-  }
+  iframe.src = url;
+  iframe.onload = () => {
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  };
 }
 </script>
 </body>
