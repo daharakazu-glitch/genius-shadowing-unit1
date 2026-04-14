@@ -458,7 +458,7 @@
 
 <!-- Shadowing Card -->
 <div class="card">
-  <div class="card-title">Shadowing Practice</div>
+  <div class="card-title">Practice</div>
   <div class="control-row" style="margin-top:0; margin-bottom:14px;">
     <label>Speed:</label>
     <button class="speed-btn" onclick="setSpeed(0.6)">0.6x</button>
@@ -473,19 +473,18 @@
         <span class="icon">&#9654;</span>
         <span>PLAY</span>
       </button>
-      <button class="shadow-btn" id="shadowBtn" onclick="handleShadow()">
+      <button class="shadow-btn" id="recBtn" onclick="handleRecord()">
         <span class="icon">&#127908;</span>
-        <span>SHADOW</span>
+        <span>REC</span>
       </button>
     </div>
-    <div class="status-text" id="statusText">Select sentences and press PLAY or SHADOW</div>
+    <div class="status-text" id="statusText">PLAY = お手本再生 / REC = 録音＋採点</div>
     <div class="waveform-container" id="waveformContainer">
       <canvas id="waveformCanvas"></canvas>
     </div>
   </div>
   <p class="tip-text">
-    PLAY = 音声再生のみ / SHADOW = 音声再生＋録音＋評価<br>
-    イヤホン使用推奨
+    PLAY = お手本音声を聴く / REC = 自分の声を録音して採点
   </p>
 </div>
 
@@ -600,7 +599,7 @@ let selectedIndices = new Set([0, 1, 2, 3, 4]);
 let showJapanese = true;
 let playbackSpeed = 0.8;
 let isPlaying = false;
-let isShadowing = false;
+let isRecording = false;
 let recognition = null;
 let recognizedText = '';
 let finalTranscript = '';
@@ -754,10 +753,10 @@ function handlePlay() {
   });
 }
 
-// ---- Shadow (Play + Record + Evaluate) ----
-async function handleShadow() {
-  if (isPlaying) {
-    stopAll();
+// ---- Record Only (no audio playback, pure recording + scoring) ----
+async function handleRecord() {
+  if (isRecording) {
+    stopRecording();
     return;
   }
   if (selectedIndices.size === 0) {
@@ -765,41 +764,23 @@ async function handleShadow() {
     return;
   }
 
-  isPlaying = true;
-  isShadowing = true;
+  isRecording = true;
   recognizedText = '';
   finalTranscript = '';
   document.getElementById('resultCard').classList.add('hidden');
 
-  const btn = document.getElementById('shadowBtn');
+  const btn = document.getElementById('recBtn');
   btn.classList.add('recording');
   btn.innerHTML = '<span class="icon">&#9724;</span><span>STOP</span>';
-  document.getElementById('statusText').textContent = 'Listening & Recording...';
+  document.getElementById('statusText').textContent = 'Recording... Speak now!';
 
   await startWaveform();
   startRecognition();
-
-  setTimeout(() => {
-    if (isPlaying) {
-      speakSentences(selectedIndices, () => {
-        document.getElementById('statusText').textContent = 'Finishing up...';
-        setTimeout(() => {
-          if (isPlaying) stopAll();
-        }, 3000);
-      });
-    }
-  }, 500);
 }
 
-function stopAll() {
-  const wasPlaying = isPlaying;
-  const wasShadowing = isShadowing;
-  isPlaying = false;
-  isShadowing = false;
-
-  // Stop TTS
-  speechSynth.cancel();
-  currentUtterance = null;
+function stopRecording() {
+  const wasRecording = isRecording;
+  isRecording = false;
 
   // Stop recognition
   if (recognition) {
@@ -812,29 +793,40 @@ function stopAll() {
   const spokenText = (recognizedText || finalTranscript || '').trim();
   stopWaveform();
 
+  // Reset button
+  const btn = document.getElementById('recBtn');
+  btn.classList.remove('recording');
+  btn.innerHTML = '<span class="icon">&#127908;</span><span>REC</span>';
+
+  if (wasRecording && spokenText) {
+    document.getElementById('statusText').textContent = 'Evaluating...';
+    setTimeout(() => {
+      showResults(spokenText);
+      document.getElementById('statusText').textContent = 'Done! Check your results below.';
+    }, 500);
+  } else if (wasRecording) {
+    document.getElementById('statusText').textContent = 'No speech detected. Check microphone and try again.';
+  } else {
+    document.getElementById('statusText').textContent = 'PLAY = お手本再生 / REC = 録音＋採点';
+  }
+}
+
+function stopAll() {
+  isPlaying = false;
+
+  // Stop TTS
+  speechSynth.cancel();
+  currentUtterance = null;
+
   // Reset highlights
   document.querySelectorAll('.sentence-card').forEach(el => {
     el.style.borderColor = 'transparent';
   });
 
-  // Reset buttons
+  // Reset play button
   const playBtn = document.getElementById('playBtn');
   playBtn.innerHTML = '<span class="icon">&#9654;</span><span>PLAY</span>';
-  const shadowBtn = document.getElementById('shadowBtn');
-  shadowBtn.classList.remove('recording');
-  shadowBtn.innerHTML = '<span class="icon">&#127908;</span><span>SHADOW</span>';
-
-  if (wasPlaying && wasShadowing && spokenText) {
-    document.getElementById('statusText').textContent = 'Evaluating...';
-    setTimeout(() => {
-      showResults(spokenText);
-      document.getElementById('statusText').textContent = 'Done!';
-    }, 500);
-  } else if (wasPlaying && wasShadowing) {
-    document.getElementById('statusText').textContent = 'No speech detected. Check microphone.';
-  } else {
-    document.getElementById('statusText').textContent = 'Select sentences and press PLAY or SHADOW';
-  }
+  document.getElementById('statusText').textContent = 'PLAY = お手本再生 / REC = 録音＋採点';
 }
 
 // ---- Speech Recognition ----
@@ -868,9 +860,9 @@ function startRecognition() {
     };
 
     rec.onend = () => {
-      if (isPlaying && isShadowing) {
+      if (isRecording) {
         setTimeout(() => {
-          if (isPlaying && isShadowing) {
+          if (isRecording) {
             recognition = createRecognition();
             try { recognition.start(); } catch(e) {}
           }
@@ -909,7 +901,7 @@ async function startWaveform() {
 }
 
 function drawWaveform() {
-  if (!isPlaying) return;
+  if (!isPlaying && !isRecording) return;
   animationId = requestAnimationFrame(drawWaveform);
   const canvas = document.getElementById('waveformCanvas');
   const ctx = canvas.getContext('2d');
@@ -1059,7 +1051,7 @@ function resetApp() {
   recognizedText = '';
   finalTranscript = '';
   document.getElementById('resultCard').classList.add('hidden');
-  document.getElementById('statusText').textContent = 'Select sentences and press PLAY or SHADOW';
+  document.getElementById('statusText').textContent = 'PLAY = お手本再生 / REC = 録音＋採点';
   const circ = 2 * Math.PI * 62;
   const fg = document.getElementById('scoreFg');
   fg.style.strokeDasharray = circ;
