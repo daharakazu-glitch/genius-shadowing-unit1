@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Put It into Focus - Unit 1 Practice</title>
+<script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+    margin-bottom: 4px;
+    text-align: center;
+    background: linear-gradient(90deg, #f7971e, #ffd200);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+    color: #aaa;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .nav-link {
+    display: inline-block;
+    margin-bottom: 16px;
+    color: #7eb8da;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.2s;
+  }
+  .nav-link:hover { color: #00d2ff; }
+
+  .card {
+    background: rgba(255,255,255,0.07);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 760px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #e0a740;
+    margin-bottom: 14px;
+  }
+
+  /* Grammar section */
+  .grammar-point {
+    background: rgba(0,0,0,0.25);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border-left: 3px solid #ffd200;
+  }
+  .grammar-point .gp-title {
+    font-size: 0.9rem;
+    color: #ffd200;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .grammar-point .gp-desc {
+    font-size: 0.85rem;
+    color: #ccc;
+    line-height: 1.7;
+    margin-bottom: 6px;
+  }
+
+  /* Sentence cards */
+  .sentence-card {
+    background: rgba(0,0,0,0.2);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+  .sentence-card:hover { border-color: rgba(255,210,0,0.3); }
+  .sentence-card.active-sentence {
+    border-color: #ffd200;
+    background: rgba(255,210,0,0.08);
+  }
+  .sentence-card .sc-num {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, #f7971e, #ffd200);
+    border-radius: 50%;
+    text-align: center;
+    line-height: 28px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+  .sentence-card .sc-en {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    display: inline;
+  }
+  .sentence-card .sc-ja {
+    display: block;
+    font-size: 0.85rem;
+    color: #aaa;
+    margin-top: 6px;
+    margin-left: 38px;
+  }
+
+  /* Toggle row */
+  .toggle-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .toggle-btn {
+    padding: 8px 16px;
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    background: transparent;
+    color: #ccc;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .toggle-btn:hover { border-color: #ffd200; color: #fff; }
+  .toggle-btn.active {
+    background: linear-gradient(135deg, #f7971e, #ffd200);
+    border-color: transparent;
+    color: #1a1a2e;
+    font-weight: 600;
+  }
+
+  /* Speed buttons */
+  .control-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .control-row label {
+    font-size: 0.85rem;
+    color: #aaa;
+    white-space: nowrap;
+  }
+  .speed-btn {
+    padding: 6px 12px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 16px;
+    background: transparent;
+    color: #aaa;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .speed-btn:hover { border-color: #ffd200; color: #fff; }
+  .speed-btn.active {
+    background: linear-gradient(135deg, #f7971e, #ffd200);
+    border-color: transparent;
+    color: #1a1a2e;
+    font-weight: 600;
+  }
+
+  /* Action buttons */
+  .action-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .action-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .play-btn, .shadow-btn {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.2);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+  }
+
+  .play-btn {
+    background: linear-gradient(135deg, #f7971e, #ffd200);
+    color: #1a1a2e;
+    box-shadow: 0 4px 25px rgba(247, 151, 30, 0.4);
+  }
+  .play-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 35px rgba(247, 151, 30, 0.6);
+  }
+  .play-btn .icon { font-size: 1.6rem; }
+
+  .shadow-btn {
+    background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+    box-shadow: 0 4px 25px rgba(58, 123, 213, 0.4);
+  }
+  .shadow-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 35px rgba(58, 123, 213, 0.6);
+  }
+  .shadow-btn.recording {
+    background: linear-gradient(135deg, #e53935, #ff6f00);
+    border-color: rgba(255,0,0,0.3);
+    box-shadow: 0 4px 30px rgba(229, 57, 53, 0.5);
+    animation: pulse 1.5s infinite;
+  }
+  .shadow-btn .icon { font-size: 1.6rem; }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 4px 30px rgba(229, 57, 53, 0.5); }
+    50% { box-shadow: 0 4px 50px rgba(229, 57, 53, 0.8); }
+  }
+
+  .status-text {
+    font-size: 0.85rem;
+    color: #aaa;
+    min-height: 20px;
+    text-align: center;
+  }
+
+  /* Waveform */
+  .waveform-container {
+    width: 100%;
+    height: 50px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .waveform-container canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Results */
+  .result-card { text-align: center; }
+
+  .score-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    margin: 10px auto 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .score-circle svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    transform: rotate(-90deg);
+  }
+  .score-circle circle { fill: none; stroke-width: 6; }
+  .score-circle .bg { stroke: rgba(255,255,255,0.1); }
+  .score-circle .fg {
+    stroke: #ffd200;
+    stroke-linecap: round;
+    stroke-dasharray: 330;
+    stroke-dashoffset: 330;
+    transition: stroke-dashoffset 1.5s ease;
+  }
+  .score-number {
+    font-size: 2.2rem;
+    font-weight: 700;
+    z-index: 1;
+  }
+  .score-label {
+    font-size: 0.7rem;
+    color: #aaa;
+    z-index: 1;
+  }
+
+  .score-grade {
+    font-size: 1rem;
+    margin-bottom: 14px;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 14px;
+    text-align: left;
+  }
+  .detail-item {
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    padding: 10px;
+  }
+  .detail-item .label { font-size: 0.7rem; color: #aaa; }
+  .detail-item .value { font-size: 1rem; font-weight: 600; margin-top: 3px; }
+
+  .comparison { text-align: left; margin-top: 10px; }
+  .comparison h4 {
+    font-size: 0.8rem;
+    color: #e0a740;
+    margin-bottom: 6px;
+  }
+  .comparison-text {
+    background: rgba(0,0,0,0.25);
+    border-radius: 10px;
+    padding: 12px;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 1rem;
+    line-height: 1.8;
+  }
+  .comparison-text .match { color: #4caf50; }
+  .comparison-text .miss { color: #ef5350; text-decoration: line-through; }
+  .comparison-text .extra { color: #ff9800; }
+
+  .retry-btn {
+    padding: 10px 28px;
+    border: none;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #f7971e, #ffd200);
+    color: #1a1a2e;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+  }
+  .retry-btn:hover { transform: scale(1.05); }
+
+  /* PDF Download section */
+  .pdf-section {
+    margin-top: 8px;
+  }
+  .pdf-btn {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid rgba(255,210,0,0.3);
+    border-radius: 12px;
+    background: rgba(255,210,0,0.06);
+    color: #ffd200;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .pdf-btn:hover {
+    background: rgba(255,210,0,0.15);
+    border-color: #ffd200;
+  }
+  .pdf-btn .pdf-icon { font-size: 1.3rem; }
+
+  .hidden { display: none !important; }
+
+  .warning {
+    background: rgba(255, 152, 0, 0.15);
+    border: 1px solid rgba(255, 152, 0, 0.4);
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 0.85rem;
+    color: #ffb74d;
+    margin-bottom: 16px;
+    max-width: 760px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .tip-text {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 8px;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 500px) {
+    .card { padding: 16px; }
+    .play-btn, .shadow-btn { width: 76px; height: 76px; font-size: 0.7rem; }
+    .play-btn .icon, .shadow-btn .icon { font-size: 1.3rem; }
+    h1 { font-size: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Put It into Focus</h1>
+<p class="subtitle">Unit 1 - Word Order / Deciding the Subject</p>
+<a href="index.html" class="nav-link">&larr; Back to Model Shadowing</a>
+
+<div id="browserWarning" class="warning hidden">
+  Chrome / Edgeブラウザでの使用を推奨します。音声認識機能が必要です。
+</div>
+
+<!-- Grammar Explanation -->
+<div class="card">
+  <div class="card-title">Grammar Points - 主語を決める①</div>
+  <div class="grammar-point">
+    <div class="gp-title">❶ 漠然と「人々」を表す we, you</div>
+    <div class="gp-desc">英語では「一般の人々」を主語として we や you を使います。</div>
+  </div>
+  <div class="grammar-point">
+    <div class="gp-title">❷ 非人称の it / 形式主語の it</div>
+    <div class="gp-desc">時間・天候を表す文や、to不定詞・that節が主語の場合に it を使います。</div>
+  </div>
+  <div class="grammar-point">
+    <div class="gp-title">❸ there 構文</div>
+    <div class="gp-desc">不特定の人・物の存在を表す文では there を主語のように使います。</div>
+  </div>
+</div>
+
+<!-- Sentences List -->
+<div class="card">
+  <div class="card-title">Example Sentences (click to select)</div>
+  <div class="toggle-row">
+    <button class="toggle-btn active" id="btnShowJa" onclick="toggleJapanese()">日本語 Show/Hide</button>
+    <button class="toggle-btn active" id="btnAll" onclick="selectAll()">All Sentences</button>
+  </div>
+  <div id="sentenceList"></div>
+</div>
+
+<!-- Shadowing Card -->
+<div class="card">
+  <div class="card-title">Shadowing Practice</div>
+  <div class="control-row" style="margin-top:0; margin-bottom:14px;">
+    <label>Speed:</label>
+    <button class="speed-btn" onclick="setSpeed(0.6)">0.6x</button>
+    <button class="speed-btn" onclick="setSpeed(0.7)">0.7x</button>
+    <button class="speed-btn active" onclick="setSpeed(0.8)">0.8x</button>
+    <button class="speed-btn" onclick="setSpeed(0.9)">0.9x</button>
+    <button class="speed-btn" onclick="setSpeed(1.0)">1.0x</button>
+  </div>
+  <div class="action-area">
+    <div class="action-row">
+      <button class="play-btn" id="playBtn" onclick="handlePlay()">
+        <span class="icon">&#9654;</span>
+        <span>PLAY</span>
+      </button>
+      <button class="shadow-btn" id="shadowBtn" onclick="handleShadow()">
+        <span class="icon">&#127908;</span>
+        <span>SHADOW</span>
+      </button>
+    </div>
+    <div class="status-text" id="statusText">Select sentences and press PLAY or SHADOW</div>
+    <div class="waveform-container" id="waveformContainer">
+      <canvas id="waveformCanvas"></canvas>
+    </div>
+  </div>
+  <p class="tip-text">
+    PLAY = 音声再生のみ / SHADOW = 音声再生＋録音＋評価<br>
+    イヤホン使用推奨
+  </p>
+</div>
+
+<!-- Results Card -->
+<div class="card result-card hidden" id="resultCard">
+  <div class="card-title">Result</div>
+  <div class="score-circle" id="scoreCircle">
+    <svg viewBox="0 0 140 140">
+      <circle class="bg" cx="70" cy="70" r="62"/>
+      <circle class="fg" id="scoreFg" cx="70" cy="70" r="62"/>
+    </svg>
+    <span class="score-number" id="scoreNumber">0%</span>
+    <span class="score-label">accuracy</span>
+  </div>
+  <div class="score-grade" id="scoreGrade"></div>
+
+  <div class="detail-grid">
+    <div class="detail-item">
+      <div class="label">Matched Words</div>
+      <div class="value" id="matchedWords">-</div>
+    </div>
+    <div class="detail-item">
+      <div class="label">Total Words</div>
+      <div class="value" id="totalWords">-</div>
+    </div>
+    <div class="detail-item">
+      <div class="label">Missed Words</div>
+      <div class="value" id="missedWords">-</div>
+    </div>
+    <div class="detail-item">
+      <div class="label">Extra Words</div>
+      <div class="value" id="extraWords">-</div>
+    </div>
+  </div>
+
+  <div class="comparison">
+    <h4>Original Text</h4>
+    <div class="comparison-text" id="comparisonOriginal"></div>
+  </div>
+  <div class="comparison" style="margin-top:8px;">
+    <h4>Your Speech</h4>
+    <div class="comparison-text" id="comparisonUser"></div>
+  </div>
+
+  <button class="retry-btn" onclick="resetApp()">Try Again</button>
+</div>
+
+<!-- PDF Download -->
+<div class="card pdf-section">
+  <div class="card-title">Download Practice Worksheets (PDF)</div>
+  <button class="pdf-btn" onclick="downloadPDF('fill')">
+    <span class="pdf-icon">📝</span> ① カッコ穴埋め問題
+  </button>
+  <button class="pdf-btn" onclick="downloadPDF('reorder')">
+    <span class="pdf-icon">🔀</span> ② 並び替え問題
+  </button>
+  <button class="pdf-btn" onclick="downloadPDF('write')">
+    <span class="pdf-icon">✍️</span> ③ 英文を書く問題
+  </button>
+  <button class="pdf-btn" onclick="downloadPDF('all')">
+    <span class="pdf-icon">📄</span> 全問題セット（3種類まとめ）
+  </button>
+</div>
+
+<script>
+// ---- Data ----
+const sentences = [
+  {
+    en: "We have a lot of snow in winter in this area.",
+    ja: "この地域は冬に雪が多い。",
+    point: "we",
+    category: 1,
+    blanks: ["We", "have"],
+    reorder: { given: "a lot of snow / have / in winter / we / in this area", answer: "We have a lot of snow in winter in this area." }
+  },
+  {
+    en: "You must obey traffic rules.",
+    ja: "交通規則は守らねばならない。",
+    point: "you",
+    category: 1,
+    blanks: ["You", "obey"],
+    reorder: { given: "obey / you / traffic rules / must", answer: "You must obey traffic rules." }
+  },
+  {
+    en: "It's half past ten.",
+    ja: "10時半です。",
+    point: "it (non-personal)",
+    category: 2,
+    blanks: ["It's", "half past"],
+    reorder: { given: "past / half / it's / ten", answer: "It's half past ten." }
+  },
+  {
+    en: "It is interesting to learn about other cultures.",
+    ja: "他の文化について学ぶのはおもしろい。",
+    point: "it (formal subject)",
+    category: 2,
+    blanks: ["It", "interesting", "to learn"],
+    reorder: { given: "to learn / interesting / it / about other cultures / is", answer: "It is interesting to learn about other cultures." }
+  },
+  {
+    en: "There is a vase on the table.",
+    ja: "そのテーブルの上に花びんがある。",
+    point: "there",
+    category: 3,
+    blanks: ["There", "is"],
+    reorder: { given: "a vase / is / on the table / there", answer: "There is a vase on the table." }
+  }
+];
+
+// ---- State ----
+let selectedIndices = new Set([0, 1, 2, 3, 4]);
+let showJapanese = true;
+let playbackSpeed = 0.8;
+let isPlaying = false;
+let isShadowing = false;
+let recognition = null;
+let recognizedText = '';
+let finalTranscript = '';
+let audioContext, analyser, microphone, dataArray, micStream;
+let animationId;
+let currentUtterance = null;
+let speechSynth = window.speechSynthesis;
+
+// ---- Init ----
+window.addEventListener('DOMContentLoaded', () => {
+  renderSentenceList();
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) document.getElementById('browserWarning').classList.remove('hidden');
+});
+
+// ---- Sentence List ----
+function renderSentenceList() {
+  const container = document.getElementById('sentenceList');
+  container.innerHTML = '';
+  sentences.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'sentence-card' + (selectedIndices.has(i) ? ' active-sentence' : '');
+    div.onclick = () => toggleSentence(i);
+    div.innerHTML = `
+      <span class="sc-num">${i + 1}</span>
+      <span class="sc-en">${s.en}</span>
+      ${showJapanese ? `<span class="sc-ja">${s.ja}</span>` : ''}
+    `;
+    container.appendChild(div);
+  });
+}
+
+function toggleSentence(index) {
+  if (selectedIndices.has(index)) {
+    selectedIndices.delete(index);
+  } else {
+    selectedIndices.add(index);
+  }
+  renderSentenceList();
+}
+
+function selectAll() {
+  if (selectedIndices.size === sentences.length) {
+    selectedIndices.clear();
+  } else {
+    selectedIndices = new Set(sentences.map((_, i) => i));
+  }
+  document.getElementById('btnAll').classList.toggle('active', selectedIndices.size === sentences.length);
+  renderSentenceList();
+}
+
+function toggleJapanese() {
+  showJapanese = !showJapanese;
+  document.getElementById('btnShowJa').classList.toggle('active', showJapanese);
+  renderSentenceList();
+}
+
+function setSpeed(speed) {
+  playbackSpeed = speed;
+  document.querySelectorAll('.speed-btn').forEach(btn => {
+    btn.classList.toggle('active', parseFloat(btn.textContent) === speed);
+  });
+}
+
+// ---- Get best voice ----
+function getBestVoice() {
+  const voices = speechSynth.getVoices();
+  // Priority list
+  const priorities = [
+    v => v.name.includes('Samantha') && v.lang.startsWith('en'),
+    v => v.name.includes('Karen') && v.lang.startsWith('en'),
+    v => v.name.includes('Daniel') && v.lang.startsWith('en'),
+    v => v.name.includes('Google') && v.lang.startsWith('en-US'),
+    v => v.name.includes('Google') && v.lang.startsWith('en'),
+    v => v.lang.startsWith('en-US') && !v.localService,
+    v => v.lang.startsWith('en-US'),
+    v => v.lang.startsWith('en'),
+  ];
+  for (const test of priorities) {
+    const match = voices.find(test);
+    if (match) return match;
+  }
+  return voices[0] || null;
+}
+
+// ---- TTS with Web Speech API ----
+function speakSentences(indices, onComplete) {
+  const idxArray = [...indices].sort((a, b) => a - b);
+  let current = 0;
+
+  // Preload voices
+  speechSynth.getVoices();
+
+  function speakNext() {
+    if (!isPlaying || current >= idxArray.length) {
+      if (onComplete) onComplete();
+      return;
+    }
+
+    const idx = idxArray[current];
+    // Highlight
+    document.querySelectorAll('.sentence-card').forEach((el, i) => {
+      el.style.borderColor = (i === idx) ? '#ffd200' : 'transparent';
+    });
+
+    const utt = new SpeechSynthesisUtterance(sentences[idx].en);
+    utt.lang = 'en-US';
+    utt.rate = playbackSpeed;
+    utt.pitch = 1.0;
+    const voice = getBestVoice();
+    if (voice) utt.voice = voice;
+    currentUtterance = utt;
+
+    utt.onend = () => {
+      currentUtterance = null;
+      current++;
+      setTimeout(speakNext, 400);
+    };
+    utt.onerror = () => {
+      currentUtterance = null;
+      current++;
+      setTimeout(speakNext, 400);
+    };
+
+    speechSynth.speak(utt);
+  }
+
+  speakNext();
+}
+
+// ---- Play Only ----
+function handlePlay() {
+  if (isPlaying) {
+    stopAll();
+    return;
+  }
+  if (selectedIndices.size === 0) {
+    document.getElementById('statusText').textContent = 'Please select at least one sentence.';
+    return;
+  }
+
+  isPlaying = true;
+  isShadowing = false;
+
+  const btn = document.getElementById('playBtn');
+  btn.innerHTML = '<span class="icon">&#9724;</span><span>STOP</span>';
+  document.getElementById('statusText').textContent = 'Playing...';
+
+  speakSentences(selectedIndices, () => {
+    if (isPlaying) stopAll();
+  });
+}
+
+// ---- Shadow (Play + Record + Evaluate) ----
+async function handleShadow() {
+  if (isPlaying) {
+    stopAll();
+    return;
+  }
+  if (selectedIndices.size === 0) {
+    document.getElementById('statusText').textContent = 'Please select at least one sentence.';
+    return;
+  }
+
+  isPlaying = true;
+  isShadowing = true;
+  recognizedText = '';
+  finalTranscript = '';
+  document.getElementById('resultCard').classList.add('hidden');
+
+  const btn = document.getElementById('shadowBtn');
+  btn.classList.add('recording');
+  btn.innerHTML = '<span class="icon">&#9724;</span><span>STOP</span>';
+  document.getElementById('statusText').textContent = 'Listening & Recording...';
+
+  await startWaveform();
+  startRecognition();
+
+  setTimeout(() => {
+    if (isPlaying) {
+      speakSentences(selectedIndices, () => {
+        document.getElementById('statusText').textContent = 'Finishing up...';
+        setTimeout(() => {
+          if (isPlaying) stopAll();
+        }, 3000);
+      });
+    }
+  }, 500);
+}
+
+function stopAll() {
+  const wasPlaying = isPlaying;
+  const wasShadowing = isShadowing;
+  isPlaying = false;
+  isShadowing = false;
+
+  // Stop TTS
+  speechSynth.cancel();
+  currentUtterance = null;
+
+  // Stop recognition
+  if (recognition) {
+    try { recognition.onend = null; recognition.stop(); } catch(e) {
+      try { recognition.abort(); } catch(e2) {}
+    }
+    recognition = null;
+  }
+
+  const spokenText = (recognizedText || finalTranscript || '').trim();
+  stopWaveform();
+
+  // Reset highlights
+  document.querySelectorAll('.sentence-card').forEach(el => {
+    el.style.borderColor = 'transparent';
+  });
+
+  // Reset buttons
+  const playBtn = document.getElementById('playBtn');
+  playBtn.innerHTML = '<span class="icon">&#9654;</span><span>PLAY</span>';
+  const shadowBtn = document.getElementById('shadowBtn');
+  shadowBtn.classList.remove('recording');
+  shadowBtn.innerHTML = '<span class="icon">&#127908;</span><span>SHADOW</span>';
+
+  if (wasPlaying && wasShadowing && spokenText) {
+    document.getElementById('statusText').textContent = 'Evaluating...';
+    setTimeout(() => {
+      showResults(spokenText);
+      document.getElementById('statusText').textContent = 'Done!';
+    }, 500);
+  } else if (wasPlaying && wasShadowing) {
+    document.getElementById('statusText').textContent = 'No speech detected. Check microphone.';
+  } else {
+    document.getElementById('statusText').textContent = 'Select sentences and press PLAY or SHADOW';
+  }
+}
+
+// ---- Speech Recognition ----
+function startRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+
+  finalTranscript = '';
+
+  function createRecognition() {
+    const rec = new SR();
+    rec.lang = 'en-US';
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+
+    rec.onresult = (event) => {
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript + ' ';
+        } else {
+          interim += event.results[i][0].transcript;
+        }
+      }
+      recognizedText = (finalTranscript + interim).trim();
+      if (recognizedText) {
+        const preview = recognizedText.length > 50 ? '...' + recognizedText.slice(-47) : recognizedText;
+        document.getElementById('statusText').textContent = 'Heard: ' + preview;
+      }
+    };
+
+    rec.onend = () => {
+      if (isPlaying && isShadowing) {
+        setTimeout(() => {
+          if (isPlaying && isShadowing) {
+            recognition = createRecognition();
+            try { recognition.start(); } catch(e) {}
+          }
+        }, 200);
+      }
+    };
+
+    rec.onerror = (event) => {
+      if (['no-speech', 'aborted'].includes(event.error)) return;
+      if (event.error === 'not-allowed') {
+        document.getElementById('statusText').textContent = 'Microphone denied. Allow access and reload.';
+      }
+    };
+
+    return rec;
+  }
+
+  recognition = createRecognition();
+  try { recognition.start(); } catch(e) {}
+}
+
+// ---- Waveform ----
+async function startWaveform() {
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioContext.createAnalyser();
+    microphone = audioContext.createMediaStreamSource(micStream);
+    microphone.connect(analyser);
+    analyser.fftSize = 256;
+    dataArray = new Uint8Array(analyser.frequencyBinCount);
+    drawWaveform();
+  } catch (e) {
+    document.getElementById('statusText').textContent = 'Microphone access required.';
+  }
+}
+
+function drawWaveform() {
+  if (!isPlaying) return;
+  animationId = requestAnimationFrame(drawWaveform);
+  const canvas = document.getElementById('waveformCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth * 2;
+  canvas.height = canvas.offsetHeight * 2;
+  analyser.getByteFrequencyData(dataArray);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const barWidth = (canvas.width / dataArray.length) * 1.5;
+  let x = 0;
+  for (let i = 0; i < dataArray.length; i++) {
+    const barHeight = (dataArray[i] / 255) * canvas.height * 0.85;
+    const gradient = ctx.createLinearGradient(0, canvas.height, 0, canvas.height - barHeight);
+    gradient.addColorStop(0, 'rgba(247, 151, 30, 0.6)');
+    gradient.addColorStop(1, 'rgba(255, 210, 0, 0.9)');
+    ctx.fillStyle = gradient;
+    const y = (canvas.height - barHeight) / 2;
+    ctx.fillRect(x, y, barWidth - 1, barHeight);
+    x += barWidth;
+  }
+}
+
+function stopWaveform() {
+  cancelAnimationFrame(animationId);
+  if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+  if (audioContext) { audioContext.close(); audioContext = null; }
+  const canvas = document.getElementById('waveformCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// ---- Evaluation ----
+function normalizeText(text) {
+  return text.toLowerCase().replace(/['']/g, "'").replace(/[-]/g, ' ')
+    .replace(/[^a-z0-9' ]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({ length: m + 1 }, (_, i) => [i]);
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+    }
+  }
+  return dp[m][n];
+}
+
+function fuzzyMatch(a, b) {
+  if (a === b) return true;
+  // Number synonyms
+  const numMap = { "10": "ten", "half": "half" };
+  if (a.length >= 4 && b.length >= 4) {
+    if (levenshtein(a, b) <= 1) return true;
+    if (a.length >= 7 && b.length >= 5 && levenshtein(a, b) <= 2) return true;
+  }
+  // it's = it is
+  if ((a === "it's" && b === "its") || (a === "its" && b === "it's")) return true;
+  return false;
+}
+
+function computeScore(original, spoken) {
+  const origWords = normalizeText(original).split(' ').filter(w => w);
+  const spokenWords = normalizeText(spoken).split(' ').filter(w => w);
+  const m = origWords.length, n = spokenWords.length;
+
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (fuzzyMatch(origWords[i-1], spokenWords[j-1])) {
+        dp[i][j] = dp[i-1][j-1] + 1;
+      } else {
+        dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+      }
+    }
+  }
+
+  const lcs = dp[m][n];
+  const origMatched = new Set();
+  const spokenMatched = new Set();
+  let i = m, j = n;
+  while (i > 0 && j > 0) {
+    if (fuzzyMatch(origWords[i-1], spokenWords[j-1])) {
+      origMatched.add(i-1); spokenMatched.add(j-1); i--; j--;
+    } else if (dp[i-1][j] > dp[i][j-1]) { i--; }
+    else { j--; }
+  }
+
+  const rawRatio = m > 0 ? lcs / m : 0;
+  let adj;
+  if (rawRatio >= 0.95) adj = 95 + (rawRatio - 0.95) * 100;
+  else if (rawRatio >= 0.7) adj = 75 + (rawRatio - 0.7) * (20 / 0.25);
+  else if (rawRatio >= 0.4) adj = 55 + (rawRatio - 0.4) * (20 / 0.3);
+  else if (rawRatio >= 0.15) adj = 35 + (rawRatio - 0.15) * (20 / 0.25);
+  else adj = 10 + (rawRatio / 0.15) * 25;
+
+  return {
+    percentage: Math.min(100, Math.round(adj)),
+    matched: lcs, total: m, missed: m - lcs,
+    extra: Math.max(0, n - lcs),
+    origWords, spokenWords, origMatched, spokenMatched
+  };
+}
+
+function getGrade(pct) {
+  if (pct >= 95) return { text: 'Excellent! Perfect!', color: '#4caf50' };
+  if (pct >= 85) return { text: 'Great job! Almost perfect!', color: '#66bb6a' };
+  if (pct >= 75) return { text: 'Well done! Keep it up!', color: '#8bc34a' };
+  if (pct >= 60) return { text: 'Good effort! Getting better!', color: '#ff9800' };
+  if (pct >= 45) return { text: 'Nice try! Practice more!', color: '#ff7043' };
+  return { text: 'Keep going! Try slower speed!', color: '#ef5350' };
+}
+
+function showResults(spokenText) {
+  const selected = [...selectedIndices].sort((a, b) => a - b);
+  const originalText = selected.map(i => sentences[i].en).join(' ');
+  const result = computeScore(originalText, spokenText);
+  const grade = getGrade(result.percentage);
+
+  document.getElementById('resultCard').classList.remove('hidden');
+  document.getElementById('scoreNumber').textContent = result.percentage + '%';
+  document.getElementById('scoreGrade').innerHTML = `<span style="color:${grade.color}">${grade.text}</span>`;
+  document.getElementById('matchedWords').textContent = result.matched + ' / ' + result.total;
+  document.getElementById('totalWords').textContent = result.total;
+  document.getElementById('missedWords').textContent = result.missed;
+  document.getElementById('extraWords').textContent = result.extra;
+
+  const circ = 2 * Math.PI * 62;
+  const fg = document.getElementById('scoreFg');
+  fg.style.strokeDasharray = circ;
+  fg.style.strokeDashoffset = circ;
+  setTimeout(() => { fg.style.strokeDashoffset = circ - (circ * result.percentage / 100); }, 100);
+  fg.style.stroke = grade.color;
+
+  document.getElementById('comparisonOriginal').innerHTML = result.origWords.map((w, i) =>
+    result.origMatched.has(i) ? `<span class="match">${w}</span>` : `<span class="miss">${w}</span>`
+  ).join(' ');
+
+  document.getElementById('comparisonUser').innerHTML = result.spokenWords.map((w, i) =>
+    result.spokenMatched.has(i) ? `<span class="match">${w}</span>` : `<span class="extra">${w}</span>`
+  ).join(' ') || '<em style="color:#666">No speech detected</em>';
+
+  document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
+}
+
+function resetApp() {
+  recognizedText = '';
+  finalTranscript = '';
+  document.getElementById('resultCard').classList.add('hidden');
+  document.getElementById('statusText').textContent = 'Select sentences and press PLAY or SHADOW';
+  const circ = 2 * Math.PI * 62;
+  const fg = document.getElementById('scoreFg');
+  fg.style.strokeDasharray = circ;
+  fg.style.strokeDashoffset = circ;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ---- PDF Generation ----
+function downloadPDF(type) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p', 'mm', 'a4');
+  const pageW = 210;
+  const margin = 20;
+  const contentW = pageW - margin * 2;
+  let y = 25;
+
+  function addHeader(title) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text(title, pageW / 2, y, { align: 'center' });
+    y += 8;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(120);
+    doc.text('Genius English Communication II - Unit 1: Put It into Focus', pageW / 2, y, { align: 'center' });
+    doc.setTextColor(0);
+    y += 5;
+    doc.setDrawColor(200);
+    doc.line(margin, y, pageW - margin, y);
+    y += 10;
+  }
+
+  function addName() {
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Name: ____________________________    Date: ______________', margin, y);
+    y += 12;
+  }
+
+  function checkPage(needed) {
+    if (y + needed > 275) {
+      doc.addPage();
+      y = 20;
+    }
+  }
+
+  function drawFillInBlank() {
+    addHeader('Fill in the Blanks');
+    addName();
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Fill in the blanks to complete each sentence.', margin, y);
+    y += 4;
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(100);
+    doc.text('Write the correct word(s) in each blank to match the Japanese meaning.', margin, y);
+    doc.setTextColor(0);
+    y += 10;
+
+    sentences.forEach((s, i) => {
+      checkPage(32);
+
+      // Japanese meaning
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(80);
+      doc.text(`${i + 1}. ${s.ja}`, margin, y);
+      doc.setTextColor(0);
+      y += 7;
+
+      // English with blanks
+      let enText = s.en;
+      s.blanks.forEach(blank => {
+        const underline = '(' + ' '.repeat(Math.max(10, blank.length * 2)) + ')';
+        enText = enText.replace(blank, underline);
+      });
+
+      doc.setFontSize(11);
+      doc.setFont('times', 'normal');
+      const lines = doc.splitTextToSize(enText, contentW);
+      lines.forEach(line => {
+        doc.text(line, margin + 8, y);
+        y += 6;
+      });
+      y += 6;
+    });
+
+    // Answer key
+    checkPage(40);
+    y += 5;
+    doc.setDrawColor(200);
+    doc.line(margin, y, pageW - margin, y);
+    y += 8;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Answer Key', margin, y);
+    y += 7;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    sentences.forEach((s, i) => {
+      checkPage(8);
+      doc.text(`${i + 1}. ${s.blanks.join(' / ')}`, margin + 4, y);
+      y += 5;
+    });
+  }
+
+  function drawReorder() {
+    addHeader('Word Rearrangement');
+    addName();
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Arrange the words to form the correct sentence.', margin, y);
+    y += 4;
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(100);
+    doc.text('Rearrange the given words/phrases to match the Japanese meaning.', margin, y);
+    doc.setTextColor(0);
+    y += 10;
+
+    sentences.forEach((s, i) => {
+      checkPage(40);
+
+      // Japanese
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(80);
+      doc.text(`${i + 1}. ${s.ja}`, margin, y);
+      doc.setTextColor(0);
+      y += 7;
+
+      // Scrambled words in a box
+      doc.setFontSize(10);
+      doc.setFont('times', 'italic');
+      const wordText = `[ ${s.reorder.given} ]`;
+      const wordLines = doc.splitTextToSize(wordText, contentW - 16);
+      doc.setDrawColor(180);
+      doc.setFillColor(245, 245, 245);
+      doc.roundedRect(margin + 4, y - 4, contentW - 8, wordLines.length * 6 + 6, 2, 2, 'FD');
+      doc.setTextColor(40);
+      wordLines.forEach(line => {
+        doc.text(line, margin + 10, y + 1);
+        y += 6;
+      });
+      doc.setTextColor(0);
+      y += 4;
+
+      // Answer line
+      doc.setDrawColor(180);
+      doc.line(margin + 8, y + 2, pageW - margin - 8, y + 2);
+      y += 12;
+    });
+
+    // Answers
+    checkPage(40);
+    y += 5;
+    doc.setDrawColor(200);
+    doc.line(margin, y, pageW - margin, y);
+    y += 8;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Answer Key', margin, y);
+    y += 7;
+    doc.setFont('times', 'normal');
+    doc.setFontSize(9);
+    sentences.forEach((s, i) => {
+      checkPage(8);
+      doc.text(`${i + 1}. ${s.reorder.answer}`, margin + 4, y);
+      y += 5;
+    });
+  }
+
+  function drawWrite() {
+    addHeader('Write the Full Sentence');
+    addName();
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Translate the Japanese into English.', margin, y);
+    y += 4;
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(100);
+    doc.text('Write the complete English sentence for each Japanese sentence below.', margin, y);
+    doc.setTextColor(0);
+    y += 10;
+
+    sentences.forEach((s, i) => {
+      checkPage(36);
+
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${i + 1}. ${s.ja}`, margin, y);
+      y += 8;
+
+      // Writing lines
+      for (let l = 0; l < 2; l++) {
+        doc.setDrawColor(200);
+        doc.line(margin + 8, y + 2, pageW - margin - 8, y + 2);
+        y += 8;
+      }
+      y += 6;
+    });
+
+    // Answers
+    checkPage(40);
+    y += 5;
+    doc.setDrawColor(200);
+    doc.line(margin, y, pageW - margin, y);
+    y += 8;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Answer Key', margin, y);
+    y += 7;
+    doc.setFont('times', 'normal');
+    doc.setFontSize(9);
+    sentences.forEach((s, i) => {
+      checkPage(8);
+      doc.text(`${i + 1}. ${s.en}`, margin + 4, y);
+      y += 5;
+    });
+  }
+
+  if (type === 'fill') {
+    drawFillInBlank();
+    doc.save('Unit1_Focus_Fill_in_Blanks.pdf');
+  } else if (type === 'reorder') {
+    drawReorder();
+    doc.save('Unit1_Focus_Word_Rearrangement.pdf');
+  } else if (type === 'write') {
+    drawWrite();
+    doc.save('Unit1_Focus_Write_Sentences.pdf');
+  } else if (type === 'all') {
+    drawFillInBlank();
+    doc.addPage();
+    y = 25;
+    drawReorder();
+    doc.addPage();
+    y = 25;
+    drawWrite();
+    doc.save('Unit1_Focus_All_Worksheets.pdf');
+  }
+}
+</script>
+</body>
+</html>
