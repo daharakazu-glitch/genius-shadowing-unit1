@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Put It into Focus Practice - Genius Unit 3</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+    background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+    min-height: 100vh;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+    margin-bottom: 6px;
+    text-align: center;
+    background: linear-gradient(90deg, #ffd166, #ff9f1c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+    color: #ddd;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  .nav-row {
+    margin-bottom: 16px;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .nav-link {
+    color: #ffd166;
+    text-decoration: none;
+    font-size: 0.85rem;
+    border: 1px solid rgba(255, 209, 102, 0.4);
+    padding: 6px 14px;
+    border-radius: 16px;
+    transition: all 0.2s;
+  }
+  .nav-link:hover {
+    background: rgba(255, 209, 102, 0.15);
+    color: #fff;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.07);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 760px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #ffd166;
+    margin-bottom: 12px;
+  }
+
+  .grammar-note {
+    background: rgba(0,0,0,0.25);
+    border-left: 3px solid #ffd166;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: #f0f0f0;
+  }
+  .grammar-note b { color: #ffd166; }
+
+  .toggle-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+    align-items: center;
+  }
+
+  .toggle-btn {
+    padding: 8px 16px;
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    background: transparent;
+    color: #ddd;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .toggle-btn:hover { border-color: #ffd166; color: #fff; }
+  .toggle-btn.active {
+    background: linear-gradient(135deg, #ff9f1c, #ffd166);
+    border-color: transparent;
+    color: #1a2a6c;
+    font-weight: 600;
+  }
+
+  .sentence-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .sentence-item {
+    background: rgba(0,0,0,0.25);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: border 0.2s;
+  }
+  .sentence-item.active {
+    border-color: #ffd166;
+  }
+
+  .sentence-number {
+    font-size: 0.75rem;
+    color: #ffd166;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+
+  .sentence-text-en {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 1.15rem;
+    line-height: 1.6;
+    margin-bottom: 6px;
+    transition: filter 0.3s;
+  }
+  .sentence-text-ja {
+    font-size: 0.95rem;
+    color: #ccc;
+    line-height: 1.6;
+    transition: filter 0.3s;
+  }
+  .sentence-text-en.hidden-text,
+  .sentence-text-ja.hidden-text {
+    filter: blur(7px);
+    user-select: none;
+  }
+  .sentence-text-en.lang-hidden,
+  .sentence-text-ja.lang-hidden { display: none; }
+
+  .sentence-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .mini-btn {
+    padding: 7px 14px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 18px;
+    background: rgba(0,0,0,0.3);
+    color: #fff;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .mini-btn:hover {
+    border-color: #ffd166;
+    background: rgba(255, 209, 102, 0.15);
+  }
+  .mini-btn.play { color: #ffd166; }
+  .mini-btn.record { color: #ff8a80; }
+  .mini-btn.record.recording {
+    background: linear-gradient(135deg, #e53935, #ff6f00);
+    border-color: transparent;
+    color: #fff;
+    animation: pulse 1.5s infinite;
+  }
+  .mini-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.6); }
+    50% { box-shadow: 0 0 0 8px rgba(229, 57, 53, 0); }
+  }
+
+  .sentence-result {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.3);
+    display: none;
+  }
+  .sentence-result.show { display: block; }
+
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .result-score {
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+  .result-grade {
+    font-size: 0.85rem;
+  }
+
+  .result-detail {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 0.92rem;
+    line-height: 1.7;
+    padding: 8px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 6px;
+  }
+  .result-detail .match { color: #4caf50; }
+  .result-detail .miss { color: #ef5350; text-decoration: line-through; }
+  .result-detail .heard { color: #bbb; font-size: 0.85rem; margin-top: 6px; }
+
+  .control-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .control-row label {
+    font-size: 0.85rem;
+    color: #ccc;
+    white-space: nowrap;
+  }
+  .control-row select {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(0,0,0,0.3);
+    color: #fff;
+    font-size: 0.85rem;
+    appearance: auto;
+  }
+  .control-row select option {
+    background: #1a2a6c;
+    color: #fff;
+  }
+
+  .speed-btn {
+    padding: 6px 12px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 16px;
+    background: transparent;
+    color: #ccc;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .speed-btn:hover { border-color: #ffd166; color: #fff; }
+  .speed-btn.active {
+    background: linear-gradient(135deg, #ff9f1c, #ffd166);
+    border-color: transparent;
+    color: #1a2a6c;
+    font-weight: 600;
+  }
+
+  .pdf-section .pdf-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .pdf-btn {
+    padding: 14px 18px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ff9f1c, #ffd166);
+    color: #1a2a6c;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .pdf-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(255, 159, 28, 0.4);
+  }
+  .pdf-btn .sub {
+    display: block;
+    font-size: 0.75rem;
+    margin-top: 4px;
+    font-weight: 500;
+    color: #1a2a6c;
+    opacity: 0.75;
+  }
+
+  .pdf-note {
+    font-size: 0.8rem;
+    color: #bbb;
+    margin-top: 10px;
+    line-height: 1.6;
+    background: rgba(0,0,0,0.2);
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .warning {
+    background: rgba(255, 152, 0, 0.15);
+    border: 1px solid rgba(255, 152, 0, 0.4);
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 0.85rem;
+    color: #ffb74d;
+    margin-bottom: 16px;
+    max-width: 760px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .tip-text {
+    font-size: 0.8rem;
+    color: #bbb;
+    margin-top: 10px;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 500px) {
+    .card { padding: 16px; }
+    h1 { font-size: 1.3rem; }
+    .sentence-text-en { font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Put It into Focus Practice</h1>
+<p class="subtitle">Genius English Communication II - Unit 3（英語の時制）</p>
+<div class="nav-row">
+  <a class="nav-link" href="index.html">&larr; Unit 3 Model</a>
+  <a class="nav-link" href="../unit2/focus_app.html">Unit 2 Focus &rarr;</a>
+</div>
+
+<div id="browserWarning" class="warning hidden">
+  録音・採点機能はChrome / Edgeブラウザでの使用を推奨します。
+</div>
+
+<!-- Grammar Note Card -->
+<div class="card">
+  <div class="card-title">Grammar Focus</div>
+  <div class="grammar-note">
+    述べることが現在のことなのか過去のことなのか、または未来についての推測なのかをはっきりさせることは英語を話す／書く上で重要です。<br><br>
+    <b>❶ 現在時制・過去時制</b>：現在における状態や習慣的行為を表す。過去の状態や習慣的行為は過去時制で表す。<br>
+    <b>❷ 未来を表す表現</b>：助動詞 will やbe going to で表す。be going toは「根拠を伴う未来の予測」のニュアンスがある。<br>
+    <b>❸ 進行形〈be動詞 + 〜ing〉</b>：その時点における一時的な行為や出来事を表す。<br>
+    <b>❹ 完了形〈have + 過去分詞〉</b>：基準となる時点（現在完了形なら「現在」）とそれ以前の時点との間のつながりを表す。
+  </div>
+</div>
+
+<!-- Display Settings Card -->
+<div class="card">
+  <div class="card-title">Display Settings</div>
+  <div class="toggle-row">
+    <span style="color:#ccc;font-size:0.85rem;">言語：</span>
+    <button class="toggle-btn active" id="btnShowEn" onclick="toggleLang('en')">English</button>
+    <button class="toggle-btn active" id="btnShowJa" onclick="toggleLang('ja')">Japanese</button>
+  </div>
+  <div class="toggle-row">
+    <span style="color:#ccc;font-size:0.85rem;">表示：</span>
+    <button class="toggle-btn active" id="btnVisible" onclick="toggleVisibility()">Show / Hide</button>
+  </div>
+  <div class="control-row">
+    <label>Voice:</label>
+    <select id="voiceSelect">
+      <option value="samantha" selected>Samantha (US Female)</option>
+      <option value="daniel">Daniel (UK Male)</option>
+      <option value="karen">Karen (AU Female)</option>
+    </select>
+  </div>
+  <div class="control-row">
+    <label>Speed:</label>
+    <button class="speed-btn" onclick="setSpeed(0.6)">0.6x</button>
+    <button class="speed-btn" onclick="setSpeed(0.7)">0.7x</button>
+    <button class="speed-btn active" onclick="setSpeed(0.8)">0.8x</button>
+    <button class="speed-btn" onclick="setSpeed(0.9)">0.9x</button>
+    <button class="speed-btn" onclick="setSpeed(1.0)">1.0x</button>
+    <button class="speed-btn" onclick="setSpeed(1.2)">1.2x</button>
+  </div>
+</div>
+
+<!-- Sentences Card -->
+<div class="card">
+  <div class="card-title">Example Sentences</div>
+  <div class="sentence-list" id="sentenceList"></div>
+  <p class="tip-text">
+    音声再生（▶ Play）と録音採点（● Record）は別々に使えます。Recordボタンを押すとマイクが起動し、話し終えてもう一度押すと採点されます。
+  </p>
+</div>
+
+<!-- PDF Export Card -->
+<div class="card pdf-section">
+  <div class="card-title">Download Practice PDF</div>
+  <div class="pdf-buttons">
+    <button class="pdf-btn" onclick="downloadPDF('blank')">
+      ① カッコ穴埋め問題
+      <span class="sub">Fill-in-the-blank</span>
+    </button>
+    <button class="pdf-btn" onclick="downloadPDF('arrange')">
+      ② 並び替え問題
+      <span class="sub">Word Arrangement</span>
+    </button>
+    <button class="pdf-btn" onclick="downloadPDF('write')">
+      ③ 完全英作文
+      <span class="sub">Complete Writing</span>
+    </button>
+  </div>
+  <div class="pdf-note">
+    ダウンロードされるHTMLファイルをブラウザで開き、プリント画面の「PDFとして保存」を選ぶとPDFになります。<br>
+    （HTMLなのでそのまま印刷してもOKです。日本語もきれいに表示されます。）
+  </div>
+</div>
+
+<script>
+const sentences = [
+  {
+    en: "Judy goes to church on Sundays.",
+    ja: "ジュディーは日曜日に教会に通っている。",
+    type: "現在時制（習慣）",
+    blank: "Judy ( _________ ) to church on Sundays.",
+    hint: "[go] を適切な形に",
+    answers: ["goes"],
+    arrangeWords: ["goes", "to", "church", "on", "Sundays"],
+    arrangeStem: "Judy"
+  },
+  {
+    en: "He usually came home before dinner.",
+    ja: "彼は夕食前に帰宅するのがふつうだった。",
+    type: "過去時制（過去の習慣）",
+    blank: "He usually ( _________ ) home before dinner.",
+    hint: "[come] を過去形に",
+    answers: ["came"],
+    arrangeWords: ["usually", "came", "home", "before", "dinner"],
+    arrangeStem: "He"
+  },
+  {
+    en: "I will be eighteen years old next month.",
+    ja: "私は来月18歳になる。",
+    type: "未来（will）",
+    blank: "I ( _________ ) ( _________ ) eighteen years old next month.",
+    hint: "助動詞 will + be動詞",
+    answers: ["will", "be"],
+    arrangeWords: ["will", "be", "eighteen", "years", "old", "next", "month"],
+    arrangeStem: "I"
+  },
+  {
+    en: "I'm going to study harder this year.",
+    ja: "今年はもっと一生懸命勉強するつもりです。",
+    type: "未来（be going to）",
+    blank: "I'm ( _________ ) ( _________ ) study harder this year.",
+    hint: "be going to + 動詞原形",
+    answers: ["going", "to"],
+    arrangeWords: ["going", "to", "study", "harder", "this", "year"],
+    arrangeStem: "I'm"
+  },
+  {
+    en: "John is swimming in the pool now.",
+    ja: "ジョンは今プールで泳いでいる。",
+    type: "現在進行形",
+    blank: "John ( _________ ) ( _________ ) in the pool now.",
+    hint: "[swim] を現在進行形に",
+    answers: ["is", "swimming"],
+    arrangeWords: ["is", "swimming", "in", "the", "pool", "now"],
+    arrangeStem: "John"
+  },
+  {
+    en: "I was studying around ten last night.",
+    ja: "私は昨夜10時頃は勉強していた。",
+    type: "過去進行形",
+    blank: "I ( _________ ) ( _________ ) around ten last night.",
+    hint: "[study] を過去進行形に",
+    answers: ["was", "studying"],
+    arrangeWords: ["was", "studying", "around", "ten", "last", "night"],
+    arrangeStem: "I"
+  },
+  {
+    en: "My sister has lived in London for two years.",
+    ja: "私の姉はロンドンに2年間住んでいる。",
+    type: "現在完了形（継続）",
+    blank: "My sister ( _________ ) ( _________ ) in London for two years.",
+    hint: "[live] を現在完了形に",
+    answers: ["has", "lived"],
+    arrangeWords: ["has", "lived", "in", "London", "for", "two", "years"],
+    arrangeStem: "My sister"
+  }
+];
+
+let showEn = true;
+let showJa = true;
+let textVisible = true;
+let playbackSpeed = 0.8;
+let currentAudio = null;
+
+// Recording state per sentence
+const recState = {};
+
+window.addEventListener('DOMContentLoaded', () => {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    document.getElementById('browserWarning').classList.remove('hidden');
+  }
+  renderSentences();
+});
+
+function renderSentences() {
+  const list = document.getElementById('sentenceList');
+  list.innerHTML = '';
+  sentences.forEach((s, i) => {
+    const item = document.createElement('div');
+    item.className = 'sentence-item';
+    item.id = 'item-' + i;
+    item.innerHTML = `
+      <div class="sentence-number">${String(i+1).padStart(2,'0')} · ${s.type}</div>
+      <div class="sentence-text-en ${showEn ? '' : 'lang-hidden'} ${textVisible ? '' : 'hidden-text'}" id="en-${i}">${s.en}</div>
+      <div class="sentence-text-ja ${showJa ? '' : 'lang-hidden'} ${textVisible ? '' : 'hidden-text'}" id="ja-${i}">${s.ja}</div>
+      <div class="sentence-actions">
+        <button class="mini-btn play" onclick="playSentence(${i})">
+          <span>&#9654;</span> Play
+        </button>
+        <button class="mini-btn record" id="rec-btn-${i}" onclick="toggleRecord(${i})">
+          <span>&#9679;</span> Record &amp; Score
+        </button>
+      </div>
+      <div class="sentence-result" id="result-${i}"></div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function toggleLang(lang) {
+  if (lang === 'en') {
+    showEn = !showEn;
+    document.getElementById('btnShowEn').classList.toggle('active', showEn);
+  } else {
+    showJa = !showJa;
+    document.getElementById('btnShowJa').classList.toggle('active', showJa);
+  }
+  sentences.forEach((_, i) => {
+    document.getElementById('en-' + i).classList.toggle('lang-hidden', !showEn);
+    document.getElementById('ja-' + i).classList.toggle('lang-hidden', !showJa);
+  });
+}
+
+function toggleVisibility() {
+  textVisible = !textVisible;
+  document.getElementById('btnVisible').classList.toggle('active', textVisible);
+  sentences.forEach((_, i) => {
+    document.getElementById('en-' + i).classList.toggle('hidden-text', !textVisible);
+    document.getElementById('ja-' + i).classList.toggle('hidden-text', !textVisible);
+  });
+}
+
+function setSpeed(speed) {
+  playbackSpeed = speed;
+  document.querySelectorAll('.speed-btn').forEach(btn => {
+    btn.classList.toggle('active', parseFloat(btn.textContent) === speed);
+  });
+  if (currentAudio) {
+    currentAudio.playbackRate = speed;
+  }
+}
+
+function playSentence(index) {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+  const voice = document.getElementById('voiceSelect').value;
+  const path = `focus_audio/${voice}_${index + 1}.wav`;
+  const audio = new Audio(path);
+  audio.playbackRate = playbackSpeed;
+  currentAudio = audio;
+  audio.onended = () => { currentAudio = null; };
+  audio.play().catch(err => console.log('Audio play error:', err));
+}
+
+async function toggleRecord(index) {
+  const state = recState[index];
+  if (state && state.recording) {
+    stopRecord(index);
+  } else {
+    await startRecord(index);
+  }
+}
+
+async function startRecord(index) {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert('このブラウザは音声認識に対応していません。Chromeをご利用ください。');
+    return;
+  }
+
+  // Stop any audio playback
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+
+  // Clear previous result
+  const resultEl = document.getElementById('result-' + index);
+  resultEl.classList.remove('show');
+  resultEl.innerHTML = '';
+
+  // Setup state
+  recState[index] = {
+    recording: true,
+    finalTranscript: '',
+    interim: '',
+    recognition: null,
+    failed: false
+  };
+
+  const btn = document.getElementById('rec-btn-' + index);
+  btn.classList.add('recording');
+  btn.innerHTML = '<span>&#9724;</span> Stop &amp; Score';
+
+  document.getElementById('item-' + index).classList.add('active');
+
+  function createRecognition() {
+    const rec = new SpeechRecognition();
+    rec.lang = 'en-US';
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+
+    rec.onresult = (event) => {
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const r = event.results[i];
+        if (r.isFinal) {
+          recState[index].finalTranscript += r[0].transcript + ' ';
+        } else {
+          interim += r[0].transcript;
+        }
+      }
+      recState[index].interim = interim;
+    };
+
+    rec.onend = () => {
+      const st = recState[index];
+      if (st && st.recording && !st.failed) {
+        setTimeout(() => {
+          const st2 = recState[index];
+          if (st2 && st2.recording) {
+            st2.recognition = createRecognition();
+            try { st2.recognition.start(); } catch(e) {}
+          }
+        }, 200);
+      }
+    };
+
+    rec.onerror = (event) => {
+      if (event.error === 'no-speech' || event.error === 'aborted') return;
+      if (event.error === 'not-allowed') {
+        const st = recState[index];
+        if (st) st.failed = true;
+        alert('マイクの許可が必要です。ブラウザの設定を確認してください。');
+      }
+    };
+
+    return rec;
+  }
+
+  recState[index].recognition = createRecognition();
+  try {
+    recState[index].recognition.start();
+  } catch (e) {
+    console.log('Start error:', e);
+  }
+}
+
+function stopRecord(index) {
+  const state = recState[index];
+  if (!state) return;
+
+  state.recording = false;
+
+  if (state.recognition) {
+    try {
+      state.recognition.onend = null;
+      state.recognition.stop();
+    } catch(e) {
+      try { state.recognition.abort(); } catch(e2) {}
+    }
+  }
+
+  const spoken = (state.finalTranscript + state.interim).trim();
+
+  const btn = document.getElementById('rec-btn-' + index);
+  btn.classList.remove('recording');
+  btn.innerHTML = '<span>&#9679;</span> Record &amp; Score';
+
+  document.getElementById('item-' + index).classList.remove('active');
+
+  // Short delay to ensure final transcripts are captured
+  setTimeout(() => {
+    const finalSpoken = (state.finalTranscript + state.interim).trim() || spoken;
+    showSentenceResult(index, finalSpoken);
+  }, 400);
+}
+
+function showSentenceResult(index, spokenText) {
+  const sentence = sentences[index];
+  const resultEl = document.getElementById('result-' + index);
+
+  if (!spokenText) {
+    resultEl.classList.add('show');
+    resultEl.innerHTML = `<div style="color:#ff9800">音声が検出されませんでした。マイクの許可を確認してください。</div>`;
+    return;
+  }
+
+  const result = computeScore(sentence.en, spokenText);
+  const grade = getGrade(result.percentage);
+
+  const origHtml = result.origWords.map((w, i) =>
+    result.origMatched.has(i)
+      ? `<span class="match">${w}</span>`
+      : `<span class="miss">${w}</span>`
+  ).join(' ');
+
+  resultEl.classList.add('show');
+  resultEl.innerHTML = `
+    <div class="result-row">
+      <div class="result-score" style="color:${grade.color}">${result.percentage}%</div>
+      <div class="result-grade" style="color:${grade.color}">${grade.text}</div>
+    </div>
+    <div class="result-detail">${origHtml}
+      <div class="heard">あなたの発話: ${escapeHtml(spokenText)}</div>
+    </div>
+  `;
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+
+function normalizeText(text) {
+  return text
+    .toLowerCase()
+    .replace(/['']/g, "'")
+    .replace(/[-]/g, ' ')
+    .replace(/[^a-z0-9' ]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function fuzzyMatch(a, b) {
+  if (a === b) return true;
+  if (a.length >= 4 && b.length >= 4) {
+    const d = levenshtein(a, b);
+    if (d <= 1) return true;
+    if (a.length >= 7 && b.length >= 5 && d <= 2) return true;
+  }
+  return false;
+}
+
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({ length: m + 1 }, (_, i) => [i]);
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i-1] === b[j-1]
+        ? dp[i-1][j-1]
+        : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+    }
+  }
+  return dp[m][n];
+}
+
+function computeScore(original, spoken) {
+  const origWords = normalizeText(original).split(' ').filter(w => w.length > 0);
+  const spokenWords = normalizeText(spoken).split(' ').filter(w => w.length > 0);
+  const m = origWords.length, n = spokenWords.length;
+
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (fuzzyMatch(origWords[i-1], spokenWords[j-1])) {
+        dp[i][j] = dp[i-1][j-1] + 1;
+      } else {
+        dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+      }
+    }
+  }
+  const lcs = dp[m][n];
+
+  const origMatched = new Set();
+  const spokenMatched = new Set();
+  let i = m, j = n;
+  while (i > 0 && j > 0) {
+    if (fuzzyMatch(origWords[i-1], spokenWords[j-1])) {
+      origMatched.add(i-1);
+      spokenMatched.add(j-1);
+      i--; j--;
+    } else if (dp[i-1][j] > dp[i][j-1]) {
+      i--;
+    } else {
+      j--;
+    }
+  }
+
+  const rawRatio = m > 0 ? lcs / m : 0;
+  let adjustedPct;
+  if (rawRatio >= 0.95) adjustedPct = 95 + (rawRatio - 0.95) * 100;
+  else if (rawRatio >= 0.7) adjustedPct = 75 + (rawRatio - 0.7) * (20 / 0.25);
+  else if (rawRatio >= 0.4) adjustedPct = 55 + (rawRatio - 0.4) * (20 / 0.3);
+  else if (rawRatio >= 0.15) adjustedPct = 35 + (rawRatio - 0.15) * (20 / 0.25);
+  else adjustedPct = 10 + (rawRatio / 0.15) * 25;
+
+  return {
+    percentage: Math.min(100, Math.round(adjustedPct)),
+    matched: lcs,
+    total: m,
+    origWords,
+    spokenWords,
+    origMatched,
+    spokenMatched
+  };
+}
+
+function getGrade(pct) {
+  if (pct >= 95) return { text: 'Excellent!', color: '#4caf50' };
+  if (pct >= 85) return { text: 'Great!', color: '#66bb6a' };
+  if (pct >= 75) return { text: 'Well done!', color: '#8bc34a' };
+  if (pct >= 60) return { text: 'Good effort!', color: '#ffd166' };
+  if (pct >= 45) return { text: 'Nice try!', color: '#ff7043' };
+  return { text: 'Keep going!', color: '#ef5350' };
+}
+
+// ---------- PDF Export ----------
+function downloadPDF(type) {
+  const html = buildPdfHtml(type);
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const names = {
+    blank: 'Unit3_Focus_カッコ穴埋め問題',
+    arrange: 'Unit3_Focus_並び替え問題',
+    write: 'Unit3_Focus_完全英作文'
+  };
+  a.href = url;
+  a.download = `${names[type]}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function buildPdfHtml(type) {
+  const titles = {
+    blank: 'カッコ穴埋め問題',
+    arrange: '並び替え問題',
+    write: '完全英作文'
+  };
+  const instructions = {
+    blank: '次の日本語に合うように、カッコ内に適切な語を入れなさい。',
+    arrange: '次の日本語に合うように、（ ）内の語句を並べ替えなさい。',
+    write: '次の日本語を英語にしなさい。'
+  };
+
+  let problems = '';
+  sentences.forEach((s, i) => {
+    const num = i + 1;
+    problems += `<div class="problem">
+      <div class="q-jp"><b>${num}.</b> ${s.ja} <span class="q-type">[${s.type}]</span></div>`;
+
+    if (type === 'blank') {
+      problems += `<div class="q-hint">ヒント: ${s.hint}</div>
+        <div class="q-en">${s.blank}</div>
+        <div class="answer-line">&nbsp;</div>`;
+    } else if (type === 'arrange') {
+      const shuffled = shuffleArray([...s.arrangeWords]);
+      problems += `<div class="q-en">${s.arrangeStem} ( ${shuffled.join(' / ')} ).</div>
+        <div class="answer-box">
+          <div class="answer-label">Your Answer:</div>
+          <div class="answer-line-long">&nbsp;</div>
+        </div>`;
+    } else if (type === 'write') {
+      problems += `<div class="answer-box">
+        <div class="answer-label">Your Answer:</div>
+        <div class="answer-line-long">&nbsp;</div>
+        <div class="answer-line-long">&nbsp;</div>
+      </div>`;
+    }
+
+    problems += `</div>`;
+  });
+
+  // Answer key
+  let answerKey = '';
+  sentences.forEach((s, i) => {
+    answerKey += `<div class="answer-item"><b>${i+1}.</b> ${s.en} <span class="ans-ja">（${s.ja}）</span></div>`;
+  });
+
+  const dateStr = new Date().toLocaleDateString('ja-JP');
+
+  return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Unit 3 Put It into Focus - ${titles[type]}</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'MS Mincho', serif;
+    color: #222;
+    margin: 0;
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+  .header {
+    text-align: center;
+    border-bottom: 2px solid #333;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+  }
+  .header h1 {
+    font-size: 18pt;
+    margin: 0 0 4px;
+  }
+  .header .meta {
+    font-size: 10pt;
+    color: #666;
+  }
+  .grammar {
+    background: #f5f5f0;
+    border: 1px solid #ddd;
+    border-left: 4px solid #b21f1f;
+    padding: 10px 14px;
+    font-size: 10pt;
+    margin-bottom: 18px;
+    line-height: 1.7;
+  }
+  .grammar b { color: #b21f1f; }
+  .instruction {
+    font-size: 11pt;
+    font-weight: bold;
+    margin-bottom: 14px;
+    padding: 8px 10px;
+    background: #333;
+    color: #fff;
+    border-radius: 4px;
+  }
+  .name-date {
+    display: flex;
+    justify-content: flex-end;
+    gap: 30px;
+    margin-bottom: 14px;
+    font-size: 10pt;
+  }
+  .name-date .field {
+    border-bottom: 1px solid #333;
+    min-width: 140px;
+    padding-bottom: 2px;
+  }
+  .problem {
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed #ccc;
+  }
+  .q-jp {
+    font-size: 11pt;
+    margin-bottom: 6px;
+  }
+  .q-type {
+    font-size: 9pt;
+    color: #888;
+    margin-left: 6px;
+  }
+  .q-hint {
+    font-size: 9.5pt;
+    color: #888;
+    margin-bottom: 6px;
+  }
+  .q-en {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 11pt;
+    margin-bottom: 10px;
+    padding: 4px 0;
+  }
+  .answer-line {
+    border-bottom: 1px solid #333;
+    min-height: 24px;
+  }
+  .answer-box {
+    margin-top: 8px;
+  }
+  .answer-label {
+    font-size: 9.5pt;
+    color: #666;
+    margin-bottom: 4px;
+  }
+  .answer-line-long {
+    border-bottom: 1px solid #333;
+    min-height: 28px;
+    margin-bottom: 8px;
+  }
+  .answer-key {
+    margin-top: 30px;
+    padding: 14px;
+    background: #fafaf5;
+    border: 1px dashed #999;
+    page-break-before: always;
+  }
+  .answer-key h2 {
+    font-size: 13pt;
+    margin: 0 0 10px;
+  }
+  .answer-item {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 11pt;
+    margin-bottom: 8px;
+    line-height: 1.6;
+  }
+  .answer-item .ans-ja {
+    font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+    color: #666;
+    font-size: 10pt;
+  }
+  .print-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 22px;
+    background: #b21f1f;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 13pt;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    font-family: 'Hiragino Kaku Gothic ProN', sans-serif;
+  }
+  .print-btn:hover { background: #8e1818; }
+  @media print {
+    .print-btn { display: none; }
+    body { padding: 0; }
+  }
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">🖨 PDFとして保存 / 印刷</button>
+
+<div class="header">
+  <h1>Genius English Communication II<br>Unit 3 Put It into Focus ― ${titles[type]}</h1>
+  <div class="meta">英語の時制 (Verb Tense &amp; Aspect) &nbsp;&nbsp;|&nbsp;&nbsp; ${dateStr}</div>
+</div>
+
+<div class="name-date">
+  <div>Class / No. <span class="field"></span></div>
+  <div>Name <span class="field"></span></div>
+</div>
+
+<div class="grammar">
+  <b>❶ 現在時制・過去時制</b>：現在の状態や習慣的行為（現在時制）／ 過去の状態や習慣的行為（過去時制）<br>
+  <b>❷ 未来表現</b>：will / be going to（根拠を伴う未来予測）<br>
+  <b>❸ 進行形</b>：その時点における一時的な行為や出来事〈be動詞 + 〜ing〉<br>
+  <b>❹ 完了形</b>：基準時点とそれ以前の時点とのつながり〈have + 過去分詞〉
+</div>
+
+<div class="instruction">【指示】 ${instructions[type]}</div>
+
+${problems}
+
+<div class="answer-key">
+  <h2>解答</h2>
+  ${answerKey}
+</div>
+
+</body>
+</html>`;
+}
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+</script>
+</body>
+</html>
